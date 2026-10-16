@@ -1,0 +1,2030 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>IIJS Lead Capture</title>
+<meta name="description" content="Offline booth lead capture for IIJS Premier.">
+<meta name="theme-color" content="#1F3864">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="IIJS Leads">
+<meta name="format-detection" content="telephone=no">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="apple-touch-icon" href="apple-touch-icon.png">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%231F3864'/%3E%3Cpath d='M24 20h16l7 8-15 18-15-18z' fill='%23D4A22A'/%3E%3C/svg%3E">
+<style>
+:root {
+  --navy: #1F3864;
+  --gold: #A87A0C;
+  --gold-soft: #F7EDD3;
+  --bg: #F4F3EE;
+  --surface: #FFFFFF;
+  --surface-2: #F8F7F2;
+  --text: #1B2030;
+  --muted: #646a76;
+  --border: #E4E1D7;
+  --field: #FBFAF7;
+  --field-border: #D3D0C5;
+  --accent: #1F3864;
+  --accent-ink: #FFFFFF;
+  --accent-soft: #E8EDF7;
+  --ring: rgba(31, 56, 100, .2);
+  --ok: #2E6A1A;
+  --ok-soft: #E6F2DA;
+  --warn: #7A4A05;
+  --warn-soft: #FBEFD8;
+  --danger: #B42318;
+  --danger-soft: #FDECEA;
+  --header: #1F3864;
+  --shadow: 0 1px 2px rgba(20, 25, 40, .05), 0 6px 18px rgba(20, 25, 40, .05);
+  --tab-h: 62px;
+  --bar-h: 72px;
+  --safe-t: env(safe-area-inset-top, 0px);
+  --safe-b: env(safe-area-inset-bottom, 0px);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --gold: #E2B347;
+    --gold-soft: #352B12;
+    --bg: #0D1220;
+    --surface: #161C2B;
+    --surface-2: #1B2233;
+    --text: #E8EAF0;
+    --muted: #9BA3B4;
+    --border: #273048;
+    --field: #1B2233;
+    --field-border: #34405A;
+    --accent: #8EA9EA;
+    --accent-ink: #0D1220;
+    --accent-soft: #1F2A45;
+    --ring: rgba(142, 169, 234, .3);
+    --ok: #A3D483;
+    --ok-soft: #1C2B17;
+    --warn: #F2C47C;
+    --warn-soft: #33270F;
+    --danger: #FF8E84;
+    --danger-soft: #3A1B1B;
+    --header: #131B30;
+    --shadow: none;
+    color-scheme: dark;
+  }
+}
+* { box-sizing: border-box; }
+[hidden] { display: none !important; }
+html { -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0; background: var(--bg); color: var(--text);
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Noto Sans", "Helvetica Neue", Arial, sans-serif;
+  font-size: 15px; line-height: 1.45;
+  -webkit-tap-highlight-color: transparent;
+  overscroll-behavior-y: none;
+}
+button, input, textarea { font: inherit; color: inherit; }
+button { cursor: pointer; touch-action: manipulation; }
+svg { flex: none; }
+.sr-file { position: absolute; width: 1px; height: 1px; opacity: 0; overflow: hidden; pointer-events: none; }
+.noscript { background: var(--danger-soft); color: var(--danger); padding: 14px 16px; font-weight: 600; }
+
+/* ---------- header ---------- */
+.appbar { position: sticky; top: 0; z-index: 20; background: var(--header); color: #fff; padding: calc(var(--safe-t) + 10px) 16px 12px; }
+.appbar-inner { max-width: 640px; margin: 0 auto; display: flex; align-items: center; gap: 12px; }
+.brand { width: 36px; height: 36px; border-radius: 10px; background: rgba(255,255,255,.1); display: flex; align-items: center; justify-content: center; }
+.appbar h1 { margin: 0; font-size: 16.5px; font-weight: 650; letter-spacing: .1px; line-height: 1.2; }
+.appbar .sub { font-size: 12.5px; opacity: .78; }
+.pill { margin-left: auto; display: flex; align-items: center; gap: 6px; font-size: 11.5px; font-weight: 600; padding: 6px 10px; border-radius: 999px; background: rgba(255,255,255,.12); white-space: nowrap; }
+.pill .dot { width: 7px; height: 7px; border-radius: 50%; background: #86D46F; }
+.pill.warn .dot { background: #F5B84A; }
+
+/* ---------- layout ---------- */
+main { max-width: 640px; margin: 0 auto; padding: 16px 16px calc(var(--tab-h) + var(--safe-b) + 28px); }
+body[data-view="new"] main { padding-bottom: calc(var(--tab-h) + var(--bar-h) + var(--safe-b) + 28px); }
+.card { background: var(--surface); border: 1px solid var(--border); border-radius: 16px; padding: 16px; margin-bottom: 14px; box-shadow: var(--shadow); }
+.card-title { display: flex; align-items: center; gap: 8px; margin: 0 0 14px; font-size: 12px; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: var(--gold); }
+.card-title .count { color: var(--muted); letter-spacing: 0; }
+.field + .field, .field + .grid2, .grid2 + .field { margin-top: 16px; }
+.grid2 > .field { margin-top: 0; }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+@media (max-width: 400px) { .grid2 { grid-template-columns: 1fr; gap: 16px; } }
+label, .lbl { display: block; font-size: 14px; font-weight: 600; margin-bottom: 7px; }
+.opt { font-weight: 400; color: var(--muted); }
+.req { color: var(--gold); }
+.hint { font-size: 12.5px; color: var(--muted); margin-top: 6px; }
+.hint.err { color: var(--danger); }
+.hint.warn { color: var(--warn); }
+.hint a, .linkish { color: var(--accent); font-weight: 600; text-decoration: underline; background: none; border: 0; padding: 0; font-size: inherit; }
+p { margin: 0 0 12px; }
+.muted { color: var(--muted); }
+.small { font-size: 13px; }
+
+input[type=text], input[type=tel], input[type=search], input[type=email], input[type=password], textarea {
+  width: 100%; font-size: 16px; padding: 12px 13px; min-height: 48px;
+  border: 1px solid var(--field-border); border-radius: 12px; background: var(--field); color: var(--text);
+  -webkit-appearance: none; appearance: none; transition: border-color .15s, box-shadow .15s;
+}
+textarea { min-height: 88px; resize: vertical; }
+input::placeholder, textarea::placeholder { color: var(--muted); opacity: .75; }
+input:focus, textarea:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px var(--ring); }
+.invalid input { border-color: var(--danger); box-shadow: 0 0 0 3px rgba(180, 35, 24, .15); }
+
+/* chips */
+.chips { display: flex; flex-wrap: wrap; gap: 8px; }
+.chip {
+  min-height: 42px; padding: 9px 15px; border-radius: 999px; font-size: 14.5px; font-weight: 500;
+  border: 1px solid var(--field-border); background: var(--field); color: var(--text);
+  display: inline-flex; align-items: center; gap: 6px; transition: background .12s, border-color .12s;
+}
+.chip[aria-pressed="true"] { background: var(--accent); border-color: var(--accent); color: var(--accent-ink); }
+.chip[aria-pressed="true"]::before { content: ""; width: 14px; height: 14px; background: currentColor;
+  -webkit-mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat;
+          mask: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='black' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='M5 12.5l4.5 4.5L19 7.5'/%3E%3C/svg%3E") center / contain no-repeat; }
+.detail { display: none; margin-top: 10px; }
+.detail.show { display: block; animation: fade .18s ease-out; }
+@keyframes fade { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+/* buttons */
+.btn {
+  min-height: 48px; padding: 0 18px; border-radius: 12px; border: 1px solid transparent;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  font-size: 15px; font-weight: 650; text-decoration: none; user-select: none; -webkit-user-select: none;
+  transition: transform .06s, opacity .15s;
+}
+.btn:active { transform: scale(.98); }
+.btn:disabled { opacity: .55; }
+.btn-block { width: 100%; }
+.btn-primary { background: var(--accent); color: var(--accent-ink); }
+.btn-secondary { background: var(--accent-soft); color: var(--accent); }
+.btn-outline { background: transparent; border-color: var(--field-border); color: var(--text); }
+.btn-danger { background: transparent; border-color: var(--danger); color: var(--danger); }
+.btn-row { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+.stack > * + * { margin-top: 10px; }
+.icon-btn { width: 40px; height: 40px; border-radius: 50%; border: 0; background: var(--surface-2); color: var(--text); display: inline-flex; align-items: center; justify-content: center; }
+
+/* photos */
+.photos { display: grid; grid-template-columns: repeat(auto-fill, minmax(92px, 1fr)); gap: 8px; margin-bottom: 12px; }
+.ph { position: relative; padding-top: 100%; border-radius: 12px; overflow: hidden; background: var(--surface-2); border: 1px solid var(--border); }
+.ph-open { position: absolute; top: 0; left: 0; width: 100%; height: 100%; padding: 0; border: 0; background: none; }
+.ph img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.ph-rm { position: absolute; top: 5px; right: 5px; width: 30px; height: 30px; border-radius: 50%; border: 0; background: rgba(10, 14, 24, .65); color: #fff; display: flex; align-items: center; justify-content: center; }
+.ph-n { position: absolute; left: 6px; bottom: 6px; font-size: 11px; font-weight: 700; color: #fff; background: rgba(10, 14, 24, .55); padding: 1px 7px; border-radius: 999px; pointer-events: none; }
+.photo-empty { display: flex; align-items: center; gap: 12px; padding: 14px; border: 1.5px dashed var(--field-border); border-radius: 12px; color: var(--muted); font-size: 13.5px; margin-bottom: 12px; }
+
+/* banners */
+.banner { display: flex; gap: 12px; align-items: flex-start; padding: 12px 14px; border-radius: 14px; font-size: 13.5px; margin-bottom: 14px; }
+.banner > div { flex: 1; }
+.banner b { display: block; margin-bottom: 2px; }
+.banner.info { background: var(--accent-soft); color: var(--text); }
+.banner.info svg { color: var(--accent); }
+.banner.warn { background: var(--warn-soft); color: var(--warn); }
+.banner.edit { background: var(--gold-soft); color: var(--text); align-items: center; }
+.banner .x { background: none; border: 0; padding: 4px; color: inherit; opacity: .7; }
+
+/* action bar + tab bar */
+.actionbar { position: fixed; left: 0; right: 0; bottom: calc(var(--tab-h) + var(--safe-b)); z-index: 15; background: var(--surface); border-top: 1px solid var(--border); padding: 11px 16px; }
+.actionbar-inner { max-width: 640px; margin: 0 auto; display: flex; gap: 10px; }
+.actionbar .btn-primary { flex: 1; }
+body:not([data-view="new"]) .actionbar { display: none; }
+.tabbar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 16; background: var(--surface); border-top: 1px solid var(--border); padding-bottom: var(--safe-b); }
+.tabbar-inner { max-width: 640px; margin: 0 auto; height: var(--tab-h); display: grid; grid-template-columns: repeat(3, 1fr); }
+.tab { position: relative; border: 0; background: none; color: var(--muted); font-size: 11.5px; font-weight: 600; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 3px; }
+.tab[aria-selected="true"] { color: var(--accent); }
+.tab[aria-selected="true"]::after { content: ""; position: absolute; top: 0; left: 30%; right: 30%; height: 3px; border-radius: 0 0 3px 3px; background: var(--gold); }
+.badge { position: absolute; top: 7px; left: calc(50% + 7px); min-width: 19px; height: 19px; padding: 0 5px; border-radius: 10px; background: var(--gold); color: #fff; font-size: 11px; font-weight: 700; display: flex; align-items: center; justify-content: center; }
+.dotbadge { position: absolute; top: 9px; left: calc(50% + 9px); width: 9px; height: 9px; border-radius: 50%; background: #E5484D; box-shadow: 0 0 0 2px var(--surface); }
+@media (pointer: coarse) {
+  body.typing .tabbar, body.typing .actionbar { display: none; }
+}
+
+/* leads list */
+.search { position: relative; }
+.search svg { position: absolute; left: 13px; top: 50%; transform: translateY(-50%); color: var(--muted); pointer-events: none; }
+.search input { padding-left: 42px; }
+.stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin: 12px 0 4px; }
+.stat { background: var(--surface); border: 1px solid var(--border); border-radius: 14px; padding: 10px 12px; }
+.stat b { display: block; font-size: 21px; line-height: 1.2; font-variant-numeric: tabular-nums; }
+.stat span { font-size: 12px; color: var(--muted); }
+.stat.alert b { color: #D9480F; }
+.day { display: flex; justify-content: space-between; margin: 20px 4px 8px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--muted); }
+.lead { width: 100%; display: flex; align-items: center; gap: 12px; text-align: left; padding: 12px; margin-bottom: 8px; background: var(--surface); border: 1px solid var(--border); border-radius: 14px; color: var(--text); }
+.lead:active { background: var(--surface-2); }
+.thumb { position: relative; width: 54px; height: 54px; flex: none; border-radius: 12px; overflow: hidden; background: var(--accent-soft); color: var(--accent); display: flex; align-items: center; justify-content: center; font-weight: 700; font-size: 16px; }
+.thumb img { position: absolute; top: 0; left: 0; width: 100%; height: 100%; object-fit: cover; }
+.thumb .ph-n { left: auto; right: 3px; bottom: 3px; padding: 0 5px; font-size: 10px; }
+.lead-main { flex: 1; min-width: 0; display: block; }
+.lead-title, .lead-sub { display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.lead-title { font-weight: 650; font-size: 15.5px; }
+.lead-sub { font-size: 13px; color: var(--muted); }
+.tags { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 6px; }
+.tag { font-size: 11.5px; padding: 2px 8px; border-radius: 999px; background: var(--surface-2); border: 1px solid var(--border); color: var(--muted); }
+.tag.hot { background: var(--gold-soft); border-color: transparent; color: var(--gold); font-weight: 600; }
+.lead-time { align-self: flex-start; font-size: 12px; color: var(--muted); white-space: nowrap; }
+.empty { text-align: center; padding: 48px 20px; color: var(--muted); }
+.empty svg { color: var(--field-border); margin-bottom: 8px; }
+.empty b { display: block; color: var(--text); font-size: 16px; margin-bottom: 4px; }
+
+/* sheets */
+.overlay { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 40; background: rgba(8, 12, 22, .5); display: none; align-items: flex-end; justify-content: center; }
+.overlay.show { display: flex; }
+.sheet { width: 100%; max-width: 640px; max-height: 90vh; max-height: 90dvh; overflow-y: auto; -webkit-overflow-scrolling: touch; overscroll-behavior: contain;
+  background: var(--surface); border-radius: 20px 20px 0 0; padding: 8px 16px calc(18px + var(--safe-b)); animation: up .22s ease-out; }
+@keyframes up { from { transform: translateY(40px); opacity: .4; } to { transform: none; opacity: 1; } }
+.grab { width: 40px; height: 5px; border-radius: 3px; background: var(--border); margin: 2px auto 12px; }
+.sheet-head { display: flex; align-items: flex-start; gap: 12px; margin-bottom: 14px; }
+.sheet-head > div { flex: 1; min-width: 0; }
+.sheet-head h2 { margin: 0; font-size: 19px; line-height: 1.25; word-break: break-word; }
+.sheet-head p { margin: 3px 0 0; color: var(--muted); font-size: 14px; }
+.quick { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 16px; }
+.quick .btn { flex-direction: column; gap: 3px; min-height: 62px; font-size: 12.5px; padding: 0 6px; }
+.strip { display: flex; gap: 8px; overflow-x: auto; -webkit-overflow-scrolling: touch; padding-bottom: 4px; margin-bottom: 10px; scroll-snap-type: x proximity; }
+.strip button { flex: none; width: 104px; height: 104px; border-radius: 12px; overflow: hidden; border: 1px solid var(--border); padding: 0; background: var(--surface-2); scroll-snap-align: start; }
+.strip img { width: 100%; height: 100%; object-fit: cover; display: block; }
+.kv { display: grid; grid-template-columns: minmax(96px, auto) 1fr; gap: 9px 14px; margin: 16px 0; font-size: 14px; }
+.kv dt { color: var(--muted); }
+.kv dd { margin: 0; white-space: pre-wrap; word-break: break-word; }
+.sep { height: 1px; background: var(--border); margin: 16px 0; }
+.filecard { display: flex; gap: 12px; align-items: center; padding: 14px; border-radius: 14px; background: var(--surface-2); border: 1px solid var(--border); margin-bottom: 14px; }
+.filecard svg { color: var(--accent); }
+.filecard b { display: block; word-break: break-all; font-size: 14px; }
+.filecard span { font-size: 12.5px; color: var(--muted); }
+.steps { margin: 0 0 12px; padding-left: 20px; }
+.steps li { margin-bottom: 6px; }
+.okline { display: flex; gap: 8px; align-items: center; color: var(--ok); font-weight: 600; margin-bottom: 12px; }
+
+/* photo viewer */
+.viewer { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 60; background: #000; color: #fff; display: none; flex-direction: column; }
+.viewer.show { display: flex; }
+.viewer-top { display: flex; align-items: center; justify-content: space-between; padding: calc(var(--safe-t) + 8px) 12px 8px; }
+.viewer-top .icon-btn { background: rgba(255,255,255,.14); color: #fff; }
+.viewer-stage { flex: 1; position: relative; display: flex; align-items: center; justify-content: center; overflow: hidden; }
+.viewer-stage img { max-width: 100%; max-height: 100%; object-fit: contain; }
+.vnav { position: absolute; top: 50%; transform: translateY(-50%); width: 44px; height: 44px; border-radius: 50%; border: 0; background: rgba(255,255,255,.16); color: #fff; display: flex; align-items: center; justify-content: center; }
+.vnav.prev { left: 10px; } .vnav.next { right: 10px; }
+.viewer-bottom { height: calc(var(--safe-b) + 16px); }
+
+/* login + sync */
+body[data-view="login"] .tabbar { display: none; }
+.login { max-width: 420px; margin: 20px auto 0; }
+.login-mark { width: 64px; height: 64px; border-radius: 18px; background: var(--header); display: flex; align-items: center; justify-content: center; margin-bottom: 18px; }
+.login h2 { font-size: 22px; margin: 0 0 6px; }
+.login .linkish { display: block; margin: 20px auto 0; font-size: 14px; }
+button.pill { border: 0; color: #fff; }
+.pill.busy .dot { background: #8FB3FF; animation: pulse 1s ease-in-out infinite; }
+@keyframes pulse { 50% { opacity: .3; } }
+.sync-tag { display: block; margin-top: 4px; font-size: 11.5px; font-weight: 600; text-align: right; }
+.sync-tag.ok { color: var(--ok); }
+.sync-tag.wait { color: #D9480F; }
+
+/* toast + busy */
+.toast { position: fixed; left: 50%; top: calc(var(--safe-t) + 66px); z-index: 80; transform: translate(-50%, -12px); opacity: 0; pointer-events: none;
+  display: flex; align-items: center; gap: 8px; max-width: calc(100% - 32px); width: max-content; padding: 11px 16px; border-radius: 14px;
+  background: #1B2030; color: #fff; font-size: 14px; font-weight: 600; box-shadow: 0 8px 24px rgba(0,0,0,.2); transition: opacity .2s, transform .2s; }
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.ok svg { color: #86D46F; }
+.toast.err { background: #8E1B12; }
+.busy { position: fixed; top: 0; left: 0; right: 0; bottom: 0; z-index: 90; background: rgba(8,12,22,.45); display: flex; align-items: center; justify-content: center; padding: 24px; }
+.busy-box { background: var(--surface); color: var(--text); border-radius: 16px; padding: 18px 20px; display: flex; align-items: center; gap: 14px; font-weight: 600; max-width: 320px; }
+.spinner { width: 24px; height: 24px; border-radius: 50%; border: 3px solid var(--accent-soft); border-top-color: var(--accent); animation: spin .8s linear infinite; flex: none; }
+@keyframes spin { to { transform: rotate(360deg); } }
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body data-view="new">
+<noscript><div class="noscript">This page needs JavaScript. If you opened it from the Files app, WhatsApp or an email preview, open the web link in Safari or Chrome instead.</div></noscript>
+
+<header class="appbar">
+  <div class="appbar-inner">
+    <div class="brand" aria-hidden="true">
+      <svg width="22" height="22" viewBox="0 0 24 24"><path d="M7 4h10l4 5-9 11L3 9z" fill="#D4A22A"/><path d="M3 9h18M9 4l-1 5 4 11 4-11-1-5" fill="none" stroke="#1F3864" stroke-width="1.3" stroke-linejoin="round"/></svg>
+    </div>
+    <div>
+      <h1>IIJS Premier · Leads</h1>
+      <div class="sub" id="hdrSub">Booth lead capture</div>
+    </div>
+    <button type="button" class="pill" id="storePill"><span class="dot"></span><span id="storePillText">Starting…</span></button>
+  </div>
+</header>
+
+<main>
+  <!-- ================= LOGIN ================= -->
+  <section class="view" id="view-login" hidden>
+    <div class="login">
+      <div class="login-mark" aria-hidden="true">
+        <svg width="36" height="36" viewBox="0 0 24 24"><path d="M7 4h10l4 5-9 11L3 9z" fill="#D4A22A"/><path d="M3 9h18M9 4l-1 5 4 11 4-11-1-5" fill="none" stroke="#1F3864" stroke-width="1.3" stroke-linejoin="round"/></svg>
+      </div>
+      <h2>Log in</h2>
+      <p class="muted small">Use the email and password your admin gave you. You need internet to log in once. After that the app works offline and syncs leads whenever there is a connection.</p>
+      <form id="loginForm" novalidate>
+        <div class="field">
+          <label for="lg-email">Email</label>
+          <input type="email" id="lg-email" autocomplete="username" inputmode="email" autocapitalize="off" spellcheck="false" placeholder="you@company.com">
+        </div>
+        <div class="field">
+          <label for="lg-pass">Password</label>
+          <input type="password" id="lg-pass" autocomplete="current-password" placeholder="Password">
+        </div>
+        <div class="hint err" id="lgErr" hidden></div>
+        <button class="btn btn-primary btn-block" id="lgBtn" type="submit" style="margin-top:18px">Log in</button>
+      </form>
+      <button type="button" class="linkish" id="lgSkip">Not now: capture offline and sync later</button>
+    </div>
+  </section>
+
+  <!-- ================= NEW LEAD ================= -->
+  <section class="view" id="view-new">
+    <div id="newBanners"></div>
+    <div class="banner edit" id="editBanner" hidden>
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>
+      <div><b>Editing a saved lead</b><span id="editName"></span></div>
+      <button type="button" class="btn btn-outline" id="btnCancelEdit" style="min-height:38px">Cancel</button>
+    </div>
+
+    <form id="leadForm" autocomplete="off" novalidate>
+      <div class="card">
+        <h2 class="card-title">Visitor</h2>
+        <div class="field" id="nameField">
+          <label for="f-name">Firm / visitor name <span class="req">*</span></label>
+          <input type="text" id="f-name" data-field="name" placeholder="e.g. Patel Jewellers" autocapitalize="words" enterkeyhint="next">
+          <div class="hint err" id="nameErr" hidden>Add the firm or visitor name to save this lead.</div>
+        </div>
+        <div class="field">
+          <label for="f-poc">Owner / POC name <span class="opt">· person you met</span></label>
+          <input type="text" id="f-poc" data-field="pocName" placeholder="e.g. Rakesh Patel" autocapitalize="words" enterkeyhint="next">
+        </div>
+        <div class="grid2">
+          <div class="field">
+            <label for="f-phone">Phone / WhatsApp</label>
+            <input type="tel" id="f-phone" data-field="phone" inputmode="tel" placeholder="10-digit number" enterkeyhint="next">
+            <div class="hint" id="phoneHint" hidden></div>
+          </div>
+          <div class="field">
+            <label for="f-city">City</label>
+            <input type="text" id="f-city" data-field="city" list="dl-city" placeholder="e.g. Rajkot" autocapitalize="words" enterkeyhint="next">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Business</h2>
+        <div class="field">
+          <span class="lbl" id="l-profile">Business profile</span>
+          <div class="chips" data-field="profile" role="group" aria-labelledby="l-profile">
+            <button type="button" class="chip" data-value="Retailer">Retailer</button>
+            <button type="button" class="chip" data-value="Wholesaler">Wholesaler</button>
+            <button type="button" class="chip" data-value="Manufacturer">Manufacturer</button>
+            <button type="button" class="chip" data-value="Mixed">Mixed</button>
+          </div>
+          <div class="detail" data-for="profile">
+            <input type="text" data-field="profileDetail" aria-label="Business profile detail" placeholder="Which mix? e.g. Retailer + Manufacturer">
+          </div>
+        </div>
+        <div class="field">
+          <span class="lbl" id="l-stores">Store setup</span>
+          <div class="chips" data-field="stores" role="group" aria-labelledby="l-stores">
+            <button type="button" class="chip" data-value="Single store">Single store</button>
+            <button type="button" class="chip" data-value="Multiple stores">Multiple stores</button>
+          </div>
+          <div class="detail" data-for="stores">
+            <input type="text" data-field="storeCount" inputmode="numeric" aria-label="Number of stores" placeholder="How many stores?">
+          </div>
+        </div>
+        <div class="field">
+          <span class="lbl" id="l-size">Store size <span class="opt">· if interested in switching</span></span>
+          <div class="chips" data-field="size" role="group" aria-labelledby="l-size">
+            <button type="button" class="chip" data-value="<500 sq feet">&lt;500 sq ft</button>
+            <button type="button" class="chip" data-value="500-1500 sq feet">500–1500 sq ft</button>
+            <button type="button" class="chip" data-value=">1500 sq feet">&gt;1500 sq ft</button>
+            <button type="button" class="chip" data-value="Not applicable">Not applicable</button>
+          </div>
+        </div>
+        <div class="field">
+          <span class="lbl" id="l-soft">Current software</span>
+          <div class="chips" data-field="softwareType" role="group" aria-labelledby="l-soft">
+            <button type="button" class="chip" data-value="None / manual">None / manual</button>
+            <button type="button" class="chip" data-value="Uses a software">Uses a software</button>
+          </div>
+          <div class="detail" data-for="softwareType">
+            <input type="text" data-field="softwareName" list="dl-software" aria-label="Software name" placeholder="Which software?">
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Conversation</h2>
+        <div class="field">
+          <span class="lbl" id="l-reason">Reason for visit</span>
+          <div class="chips" data-field="reason" role="group" aria-labelledby="l-reason">
+            <button type="button" class="chip" data-value="Not looking to change">Not looking to change</button>
+            <button type="button" class="chip" data-value="Expanding">Expanding</button>
+            <button type="button" class="chip" data-value="Heard about us / referral">Heard about us / referral</button>
+            <button type="button" class="chip" data-value="Just enquiring">Just enquiring</button>
+            <button type="button" class="chip" data-value="Existing customer">Existing customer</button>
+          </div>
+          <div class="detail" data-for="reason">
+            <input type="text" data-field="reasonDetail" aria-label="Reason detail" placeholder="Any more detail on the reason (optional)">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-product">Product(s) pitched / relevant</label>
+          <input type="text" id="f-product" data-field="product" list="dl-product" placeholder="e.g. Ornate NX, CRM" enterkeyhint="next">
+        </div>
+        <div class="field">
+          <span class="lbl" id="l-action">Next action</span>
+          <div class="chips" data-field="action" role="group" aria-labelledby="l-action">
+            <button type="button" class="chip" data-value="Brochure shown">Brochure shown</button>
+            <button type="button" class="chip" data-value="Transferred to product team">Transferred to product team</button>
+            <button type="button" class="chip" data-value="Demo slot booked">Demo slot booked</button>
+            <button type="button" class="chip" data-value="Card given only">Card given only</button>
+          </div>
+          <div class="detail" data-for="action">
+            <input type="text" data-field="actionDetail" aria-label="Next action detail" placeholder="Follow-up detail, e.g. demo on 22 Oct, 4 pm">
+          </div>
+        </div>
+        <div class="field">
+          <label for="f-notes">Notes</label>
+          <textarea id="f-notes" data-field="notes" placeholder="Anything worth remembering for follow-up"></textarea>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Photos <span class="count" id="photoCount"></span></h2>
+        <div class="photo-empty" id="photoEmpty">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"/><circle cx="8.5" cy="10" r="1.6"/><path d="M21 15l-5-5L5 19"/></svg>
+          <span>Visiting card, store, catalogue — add as many photos as you need.</span>
+        </div>
+        <div class="photos" id="photoGrid" hidden></div>
+        <div class="btn-row">
+          <label class="btn btn-secondary" for="camInput" role="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 8h3l2-3h6l2 3h3a1 1 0 011 1v9a1 1 0 01-1 1H4a1 1 0 01-1-1V9a1 1 0 011-1z"/><circle cx="12" cy="13" r="3.5"/></svg>
+            Take photo
+          </label>
+          <label class="btn btn-secondary" for="galInput" role="button">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="1.8"/><path d="M21 16l-5-5-9 9"/></svg>
+            Gallery
+          </label>
+        </div>
+        <input type="file" id="camInput" class="sr-file" accept="image/*" capture="environment" tabindex="-1">
+        <input type="file" id="galInput" class="sr-file" accept="image/*" multiple tabindex="-1">
+      </div>
+
+      <div class="card">
+        <h2 class="card-title">Captured by</h2>
+        <input type="text" id="f-by" data-field="capturedBy" list="dl-by" aria-label="Captured by" placeholder="Your name" autocapitalize="words" enterkeyhint="done">
+        <div class="hint">Remembered on this phone for your next lead.</div>
+      </div>
+    </form>
+  </section>
+
+  <!-- ================= LEADS ================= -->
+  <section class="view" id="view-leads" hidden>
+    <div class="search">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="M20 20l-3.5-3.5"/></svg>
+      <input type="search" id="q" placeholder="Search firm, POC, city, phone…" aria-label="Search leads" enterkeyhint="search">
+    </div>
+    <div class="stats">
+      <div class="stat"><b id="stTotal">0</b><span>Total leads</span></div>
+      <div class="stat"><b id="stToday">0</b><span>Today</span></div>
+      <button type="button" class="stat" id="stPendingBox" style="text-align:left;font:inherit;color:inherit"><b id="stPending">0</b><span id="stPendingLabel">Not backed up</span></button>
+    </div>
+    <div id="leadList"></div>
+    <div class="empty" id="leadEmpty" hidden>
+      <svg width="56" height="56" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="4" y="3" width="16" height="18" rx="2"/><path d="M8 8h8M8 12h8M8 16h5"/></svg>
+      <b>No leads on this phone yet</b>
+      <p>Leads you save appear here, newest first.</p>
+      <button type="button" class="btn btn-primary" data-goto="new">Add your first lead</button>
+    </div>
+  </section>
+
+  <!-- ================= BACKUP ================= -->
+  <section class="view" id="view-backup" hidden>
+    <div class="card" id="accountCard" hidden>
+      <h2 class="card-title">Account &amp; sync</h2>
+      <div id="accountBody"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Back up &amp; share</h2>
+      <p id="backupStatus"></p>
+      <div class="stack">
+        <button type="button" class="btn btn-primary btn-block" id="btnExportZip">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+          Export everything (sheet + photos)
+        </button>
+        <button type="button" class="btn btn-outline btn-block" id="btnExportCsv">Export sheet only (CSV)</button>
+      </div>
+      <p class="hint" style="margin-top:12px">The ZIP has an Excel-ready sheet plus every photo, named by serial no. and firm (e.g. <i>007_Patel-Jewellers_1.jpg</i>). Send it on WhatsApp / email, or save it to Files / Drive.</p>
+    </div>
+
+    <div class="card" id="combineCard">
+      <h2 class="card-title">Combine team leads</h2>
+      <p class="small">On one phone, import the ZIP or CSV files your teammates exported. Leads already on this phone are skipped, so importing twice is safe.</p>
+      <label class="btn btn-secondary btn-block" for="importInput" role="button">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+        Import ZIP / CSV files
+      </label>
+      <input type="file" id="importInput" class="sr-file" multiple tabindex="-1">
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">Use offline</h2>
+      <div id="installHelp"></div>
+    </div>
+
+    <div class="card">
+      <h2 class="card-title">This phone</h2>
+      <dl class="kv" id="deviceInfo" style="margin-top:0"></dl>
+      <button type="button" class="btn btn-danger btn-block" id="btnClear">Delete all leads from this phone</button>
+    </div>
+  </section>
+</main>
+
+<div class="actionbar" id="actionBar">
+  <div class="actionbar-inner">
+    <button type="button" class="btn btn-outline" id="btnReset">Clear</button>
+    <button type="button" class="btn btn-primary" id="btnSave">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>
+      <span id="saveLabel">Save lead</span>
+    </button>
+  </div>
+</div>
+
+<nav class="tabbar" aria-label="Sections">
+  <div class="tabbar-inner" role="tablist">
+    <button type="button" class="tab" role="tab" data-view="new" aria-selected="true">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 8v8M8 12h8"/></svg>
+      New lead
+    </button>
+    <button type="button" class="tab" role="tab" data-view="leads" aria-selected="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 20v-1.5a3.5 3.5 0 00-3.5-3.5h-5A3.5 3.5 0 004 18.5V20"/><circle cx="10" cy="8" r="3.5"/><path d="M20 20v-1.5a3.5 3.5 0 00-2.5-3.35M15.5 4.6a3.5 3.5 0 010 6.8"/></svg>
+      Leads
+      <span class="badge" id="tabBadge" hidden>0</span>
+    </button>
+    <button type="button" class="tab" role="tab" data-view="backup" aria-selected="false">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12M7 10l5 5 5-5"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg>
+      Backup
+      <span class="dotbadge" id="backupDot" hidden></span>
+    </button>
+  </div>
+</nav>
+
+<div class="overlay" id="overlay"><div class="sheet" id="sheet" role="dialog" aria-modal="true"></div></div>
+
+<div class="viewer" id="viewer" role="dialog" aria-modal="true" aria-label="Photo viewer">
+  <div class="viewer-top">
+    <span id="vCount"></span>
+    <button type="button" class="icon-btn" id="vClose" aria-label="Close">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>
+    </button>
+  </div>
+  <div class="viewer-stage" id="vStage">
+    <img id="vImg" alt="Photo">
+    <button type="button" class="vnav prev" id="vPrev" aria-label="Previous photo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 5l-7 7 7 7"/></svg></button>
+    <button type="button" class="vnav next" id="vNext" aria-label="Next photo"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M9 5l7 7-7 7"/></svg></button>
+  </div>
+  <div class="viewer-bottom"></div>
+</div>
+
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+<div class="busy" id="busy" hidden><div class="busy-box"><span class="spinner"></span><span id="busyText">Working…</span></div></div>
+
+<datalist id="dl-city"></datalist>
+<datalist id="dl-product"></datalist>
+<datalist id="dl-software"></datalist>
+<datalist id="dl-by"></datalist>
+
+<script src="config.js"></script>
+<script src="lib.js"></script>
+<script>
+(function () {
+  'use strict';
+
+  var APP_VERSION = '3.0';
+  var DRAFT = '__draft__';
+  var LS = { draft: 'iijs_draft_v2', by: 'iijs_captured_by', lastExport: 'iijs_last_export', hideInstall: 'iijs_hide_install', migrated: 'iijs_migrated_v1' };
+  var LEAD_KEYS = ['name', 'pocName', 'city', 'phone', 'profile', 'profileDetail', 'stores', 'storeCount', 'softwareType', 'softwareName',
+    'reason', 'reasonDetail', 'size', 'product', 'action', 'actionDetail', 'notes', 'capturedBy'];
+  // Detail box under a chip group: shown when the chosen value is listed ('*' = any value).
+  var DETAIL_RULES = {
+    profile: { field: 'profileDetail', when: ['Mixed'] },
+    stores: { field: 'storeCount', when: ['Multiple stores'] },
+    softwareType: { field: 'softwareName', when: ['Uses a software'] },
+    reason: { field: 'reasonDetail', when: '*' },
+    action: { field: 'actionDetail', when: '*' }
+  };
+  var HEADER_TO_KEY = IIJS.HEADER_TO_KEY;
+
+  var ICON = {
+    check: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12.5l4.5 4.5L19 7.5"/></svg>',
+    alert: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 7.5v5.5M12 16.5v.01"/></svg>',
+    x: '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    close: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><path d="M6 6l12 12M18 6L6 18"/></svg>',
+    phone: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 4h4l2 5-2.5 1.5a11 11 0 005 5L15 13l5 2v4a2 2 0 01-2 2A16 16 0 013 6a2 2 0 012-2"/></svg>',
+    chat: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 11.5a8.5 8.5 0 01-12.4 7.5L3 20.5l1.5-4.4A8.5 8.5 0 1120 11.5z"/></svg>',
+    edit: '<svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 20h9"/><path d="M16.5 3.5a2.1 2.1 0 013 3L7 19l-4 1 1-4z"/></svg>',
+    share: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 15V3M7 8l5-5 5 5"/><path d="M5 12v7a2 2 0 002 2h10a2 2 0 002-2v-7"/></svg>',
+    file: '<svg width="34" height="34" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M14 3H7a2 2 0 00-2 2v14a2 2 0 002 2h10a2 2 0 002-2V8z"/><path d="M14 3v5h5M10 12h4M10 16h4"/></svg>',
+    info: '<svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><path d="M12 11v5.5M12 7.5v.01"/></svg>'
+  };
+
+  // ---------- helpers ----------
+  function $(s, r) { return (r || document).querySelector(s); }
+  function $$(s, r) { return Array.prototype.slice.call((r || document).querySelectorAll(s)); }
+  function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+  function lsGet(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
+  function lsSet(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage blocked */ } }
+  function lsDel(k) { try { localStorage.removeItem(k); } catch (e) { /* storage blocked */ } }
+  function uid(p) { return p + '_' + Date.now() + '_' + Math.random().toString(36).slice(2, 7); }
+  function slug(s) { return (s || '').trim().replace(/[^a-zA-Z0-9]+/g, '-').replace(/^-+|-+$/g, '').slice(0, 40) || 'lead'; }
+  function digits(s) { return String(s || '').replace(/\D/g, ''); }
+  function pad(n) { return n < 10 ? '0' + n : '' + n; }
+  function validISO(s) { return s && !isNaN(new Date(s).getTime()) ? new Date(s).toISOString() : ''; }
+  function fmtDateTime(iso) {
+    var d = new Date(iso);
+    return d.toLocaleString('en-IN', { day: '2-digit', month: 'short', year: 'numeric', hour: '2-digit', minute: '2-digit' });
+  }
+  function fmtTime(iso) { return new Date(iso).toLocaleTimeString('en-IN', { hour: 'numeric', minute: '2-digit' }); }
+  function dayKey(iso) { var d = new Date(iso); return d.getFullYear() + '-' + d.getMonth() + '-' + d.getDate(); }
+  function dayLabel(iso) {
+    var k = dayKey(iso), now = new Date(), y = new Date(now.getTime() - 864e5);
+    if (k === dayKey(now)) return 'Today';
+    if (k === dayKey(y)) return 'Yesterday';
+    return new Date(iso).toLocaleDateString('en-IN', { weekday: 'short', day: 'numeric', month: 'short' });
+  }
+  function fmtBytes(n) {
+    if (n < 1024) return n + ' B';
+    if (n < 1048576) return Math.round(n / 1024) + ' KB';
+    return (n / 1048576).toFixed(n < 10485760 ? 1 : 0) + ' MB';
+  }
+  function plural(n, w) { return n + ' ' + w + (n === 1 ? '' : 's'); }
+  function blobToBuf(b) {
+    if (b.arrayBuffer) return b.arrayBuffer();
+    return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.onerror = rej; fr.readAsArrayBuffer(b); });
+  }
+  function blobToText(b) {
+    if (b.text) return b.text();
+    return new Promise(function (res, rej) { var fr = new FileReader(); fr.onload = function () { res(fr.result); }; fr.onerror = rej; fr.readAsText(b); });
+  }
+  function dataURLtoBlob(u) {
+    var parts = u.split(','), m = parts[0].match(/:(.*?);/), bin = atob(parts[1]), arr = new Uint8Array(bin.length);
+    for (var i = 0; i < bin.length; i++) arr[i] = bin.charCodeAt(i);
+    return new Blob([arr], { type: m ? m[1] : 'image/jpeg' });
+  }
+  function extFor(type) { return /png/.test(type) ? 'png' : /webp/.test(type) ? 'webp' : /hei[cf]/.test(type) ? 'heic' : 'jpg'; }
+  function mimeFor(name) { var e = (name.split('.').pop() || '').toLowerCase(); return e === 'png' ? 'image/png' : e === 'webp' ? 'image/webp' : e === 'heic' ? 'image/heic' : 'image/jpeg'; }
+  function waNumber(phone) {
+    var d = digits(phone);
+    if (d.length === 11 && d[0] === '0') d = d.slice(1);
+    if (d.length === 10) d = '91' + d;
+    return d.length >= 11 ? d : '';
+  }
+  var enc = new TextEncoder();
+  var dec = new TextDecoder();
+
+  var isIOS = /iP(hone|ad|od)/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
+  var isHttp = /^https?:$/.test(location.protocol);
+  function isStandalone() { return (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true; }
+
+  // ---------- storage: IndexedDB, falling back to memory ----------
+  var store = (function () {
+    var db = null, mem = { leads: {}, photos: {} };
+    function wrap(fn) {
+      return new Promise(function (res, rej) {
+        try { var r = fn(); r.onsuccess = function () { res(r.result); }; r.onerror = function () { rej(r.error); }; }
+        catch (e) { rej(e); }
+      });
+    }
+    function os(name, mode) { return db.transaction(name, mode || 'readonly').objectStore(name); }
+    function norm(p) {
+      if (p && !p.blob && p.buf) p.blob = new Blob([p.buf], { type: p.type || 'image/jpeg' });
+      return p || null;
+    }
+    var api = {
+      persistent: false,
+      open: function () {
+        return new Promise(function (resolve) {
+          var done = false;
+          function finish(ok) { if (!done) { done = true; api.persistent = ok; resolve(ok); } }
+          if (!window.indexedDB) return finish(false);
+          var r;
+          try { r = indexedDB.open('iijs_leads', 1); } catch (e) { return finish(false); }
+          setTimeout(function () { finish(false); }, 5000);
+          r.onupgradeneeded = function () {
+            var d = r.result;
+            if (!d.objectStoreNames.contains('leads')) d.createObjectStore('leads', { keyPath: 'id' });
+            if (!d.objectStoreNames.contains('photos')) d.createObjectStore('photos', { keyPath: 'id' }).createIndex('leadId', 'leadId');
+          };
+          r.onsuccess = function () { if (done) return; db = r.result; finish(true); };
+          r.onerror = function () { finish(false); };
+        });
+      },
+      allLeads: function () {
+        if (!db) return Promise.resolve(Object.keys(mem.leads).map(function (k) { return mem.leads[k]; }));
+        return wrap(function () { return os('leads').getAll(); });
+      },
+      putLead: function (l) {
+        if (!db) { mem.leads[l.id] = l; return Promise.resolve(); }
+        return wrap(function () { return os('leads', 'readwrite').put(l); });
+      },
+      delLead: function (id) {
+        if (!db) { delete mem.leads[id]; return Promise.resolve(); }
+        return wrap(function () { return os('leads', 'readwrite').delete(id); });
+      },
+      putPhoto: function (p) {
+        if (!db) { mem.photos[p.id] = p; return Promise.resolve(); }
+        return wrap(function () { return os('photos', 'readwrite').put(p); }).catch(function () {
+          // Some older Safari builds refuse Blobs in IndexedDB; store raw bytes instead.
+          return blobToBuf(p.blob).then(function (buf) {
+            return wrap(function () { return os('photos', 'readwrite').put({ id: p.id, leadId: p.leadId, buf: buf, type: p.blob.type || 'image/jpeg', createdAt: p.createdAt }); });
+          });
+        });
+      },
+      getPhoto: function (id) {
+        if (!db) return Promise.resolve(mem.photos[id] || null);
+        return wrap(function () { return os('photos').get(id); }).then(norm);
+      },
+      delPhoto: function (id) {
+        if (!db) { delete mem.photos[id]; return Promise.resolve(); }
+        return wrap(function () { return os('photos', 'readwrite').delete(id); });
+      },
+      photoIdsFor: function (leadId) {
+        if (!db) return Promise.resolve(Object.keys(mem.photos).filter(function (k) { return mem.photos[k].leadId === leadId; }));
+        return wrap(function () { return os('photos').index('leadId').getAllKeys(leadId); });
+      },
+      setPhotoLead: function (id, leadId) {
+        return api.getPhoto(id).then(function (p) {
+          if (!p || p.leadId === leadId) return;
+          p.leadId = leadId;
+          return api.putPhoto(p);
+        });
+      },
+      clear: function () {
+        if (!db) { mem = { leads: {}, photos: {} }; return Promise.resolve(); }
+        return wrap(function () { return os('leads', 'readwrite').clear(); }).then(function () {
+          return wrap(function () { return os('photos', 'readwrite').clear(); });
+        });
+      }
+    };
+    return api;
+  })();
+
+  // ---------- app state ----------
+  var leads = [];
+  var form = { editingId: null, photoIds: [], removedIds: [] };
+  var urlCache = {};
+  var offlineReady = false;
+  var installPrompt = null;
+  var api = window.IIJS && IIJS.Api.configured ? new IIJS.Api('app') : null;
+
+  function sortLeads() { leads.sort(function (a, b) { return a.timestamp < b.timestamp ? 1 : -1; }); }
+  function findLead(id) { for (var i = 0; i < leads.length; i++) if (leads[i].id === id) return leads[i]; return null; }
+  function photoURL(id) {
+    if (urlCache[id]) return Promise.resolve(urlCache[id]);
+    return store.getPhoto(id).then(function (p) {
+      if (!p || !p.blob) return '';
+      urlCache[id] = URL.createObjectURL(p.blob);
+      return urlCache[id];
+    }).catch(function () { return ''; });
+  }
+  function dropURL(id) { if (urlCache[id]) { URL.revokeObjectURL(urlCache[id]); delete urlCache[id]; } }
+  function lastExport() { return lsGet(LS.lastExport) || ''; }
+  function pendingCount() {
+    var t = lastExport();
+    return leads.filter(function (l) { return (l.updatedAt || l.timestamp) > t; }).length;
+  }
+
+  // ---------- toast / busy ----------
+  var toastTimer;
+  function toast(msg, kind) {
+    var t = $('#toast');
+    t.innerHTML = (kind === 'ok' ? ICON.check : kind === 'err' ? ICON.alert : '') + '<span>' + esc(msg) + '</span>';
+    t.className = 'toast show ' + (kind || '');
+    clearTimeout(toastTimer);
+    toastTimer = setTimeout(function () { t.className = 'toast ' + (kind || ''); }, kind === 'err' ? 5000 : 2800);
+  }
+  function busy(text) {
+    if (text === false) { $('#busy').hidden = true; return; }
+    $('#busyText').textContent = text;
+    $('#busy').hidden = false;
+  }
+
+  // ---------- layers (sheet / viewer) close with Android back button ----------
+  var layers = [], ignorePops = 0;
+  function pushLayer(name) {
+    var pushed = false;
+    try { history.pushState({ layer: name }, ''); pushed = true; } catch (e) { /* file:// on some browsers */ }
+    layers.push({ name: name, pushed: pushed });
+  }
+  function hideLayer(name) {
+    if (name === 'sheet') { $('#overlay').classList.remove('show'); $('#sheet').innerHTML = ''; document.body.style.overflow = ''; }
+    if (name === 'viewer') { $('#viewer').classList.remove('show'); $('#vImg').removeAttribute('src'); }
+  }
+  function closeLayer(name) {
+    for (var i = layers.length - 1; i >= 0; i--) {
+      if (layers[i].name !== name) continue;
+      var l = layers.splice(i, 1)[0];
+      hideLayer(name);
+      if (l.pushed) { ignorePops++; history.back(); }
+      return;
+    }
+  }
+  window.addEventListener('popstate', function () {
+    if (ignorePops > 0) { ignorePops--; return; }
+    var l = layers.pop();
+    if (l) hideLayer(l.name);
+  });
+
+  function openSheet(html) {
+    var sheet = $('#sheet');
+    sheet.innerHTML = '<div class="grab"></div>' + html;
+    sheet.scrollTop = 0;
+    if (!$('#overlay').classList.contains('show')) {
+      $('#overlay').classList.add('show');
+      document.body.style.overflow = 'hidden';
+      pushLayer('sheet');
+    }
+    return sheet;
+  }
+  function closeSheet() { closeLayer('sheet'); }
+  $('#overlay').addEventListener('click', function (e) { if (e.target.id === 'overlay') closeSheet(); });
+
+  // ---------- views ----------
+  function show(view) {
+    document.body.setAttribute('data-view', view);
+    $$('.view').forEach(function (v) { v.hidden = v.id !== 'view-' + view; });
+    $$('.tab').forEach(function (t) { t.setAttribute('aria-selected', String(t.getAttribute('data-view') === view)); });
+    if (view === 'leads') renderLeads();
+    if (view === 'backup') renderBackup();
+    window.scrollTo(0, 0);
+  }
+  $$('.tab').forEach(function (t) { t.addEventListener('click', function () { show(t.getAttribute('data-view')); }); });
+  document.addEventListener('click', function (e) {
+    var g = e.target.closest('[data-goto]');
+    if (g) show(g.getAttribute('data-goto'));
+  });
+
+  // hide bottom bars while the keyboard is up (phones)
+  document.addEventListener('focusin', function (e) {
+    if (e.target.matches('input:not([type=file]), textarea')) document.body.classList.add('typing');
+  });
+  document.addEventListener('focusout', function () {
+    setTimeout(function () {
+      var a = document.activeElement;
+      if (!a || !a.matches('input:not([type=file]), textarea')) document.body.classList.remove('typing');
+    }, 60);
+  });
+
+  // ---------- form ----------
+  var formEl = $('#leadForm');
+  formEl.addEventListener('submit', function (e) { e.preventDefault(); });
+
+  function chipValue(group) { var s = $('.chip[aria-pressed="true"]', group); return s ? s.getAttribute('data-value') : ''; }
+  function ruleOn(key, value) {
+    var r = DETAIL_RULES[key];
+    return !!(r && value && (r.when === '*' || r.when.indexOf(value) >= 0));
+  }
+  function readForm(raw) {
+    var d = {};
+    $$('[data-field]', formEl).forEach(function (el) {
+      var f = el.getAttribute('data-field');
+      d[f] = el.classList.contains('chips') ? chipValue(el) : (raw ? el.value : el.value.trim());
+    });
+    if (!raw) Object.keys(DETAIL_RULES).forEach(function (k) { if (!ruleOn(k, d[k])) d[DETAIL_RULES[k].field] = ''; });
+    return d;
+  }
+  function fillForm(d) {
+    $$('[data-field]', formEl).forEach(function (el) {
+      var v = d[el.getAttribute('data-field')] || '';
+      if (el.classList.contains('chips')) $$('.chip', el).forEach(function (c) { c.setAttribute('aria-pressed', String(c.getAttribute('data-value') === v)); });
+      else el.value = v;
+    });
+    syncDetails();
+  }
+  function syncDetails() {
+    $$('.detail', formEl).forEach(function (box) {
+      var key = box.getAttribute('data-for');
+      box.classList.toggle('show', ruleOn(key, chipValue($('.chips[data-field="' + key + '"]', formEl))));
+    });
+  }
+  function isBlank(d) {
+    return LEAD_KEYS.every(function (k) { return k === 'capturedBy' || !String(d[k] || '').trim(); });
+  }
+  function hasContent() { return !!form.editingId || form.photoIds.length > 0 || !isBlank(readForm(true)); }
+
+  formEl.addEventListener('click', function (e) {
+    var chip = e.target.closest('.chip');
+    if (!chip) return;
+    var group = chip.parentNode, on = chip.getAttribute('aria-pressed') === 'true';
+    $$('.chip', group).forEach(function (c) { c.setAttribute('aria-pressed', 'false'); });
+    if (!on) chip.setAttribute('aria-pressed', 'true');
+    syncDetails();
+    saveDraftSoon();
+  });
+  formEl.addEventListener('input', function (e) {
+    if (e.target.id === 'f-name' && e.target.value.trim()) { $('#nameErr').hidden = true; $('#nameField').classList.remove('invalid'); }
+    saveDraftSoon();
+  });
+  // Enter jumps to the next visible text box instead of submitting
+  formEl.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' || e.target.tagName !== 'INPUT') return;
+    e.preventDefault();
+    var boxes = $$('input[type=text], input[type=tel]', formEl).filter(function (el) { return el.offsetParent !== null; });
+    var i = boxes.indexOf(e.target);
+    if (i >= 0 && boxes[i + 1]) boxes[i + 1].focus(); else e.target.blur();
+  });
+
+  // phone: soft checks + duplicate warning
+  $('#f-phone').addEventListener('blur', checkPhone);
+  function checkPhone() {
+    var hint = $('#phoneHint'), d = digits($('#f-phone').value);
+    hint.hidden = true; hint.className = 'hint';
+    if (!d) return;
+    var last10 = d.slice(-10);
+    var dup = d.length >= 10 && leads.filter(function (l) { return l.id !== form.editingId && digits(l.phone).slice(-10) === last10; })[0];
+    if (dup) {
+      hint.className = 'hint warn';
+      hint.innerHTML = 'Already captured: <b>' + esc(dup.name) + '</b> (' + esc(dayLabel(dup.timestamp)) + '). <button type="button" class="linkish" data-open="' + esc(dup.id) + '">View</button>';
+      hint.hidden = false;
+    } else if (d.length < 10) {
+      hint.className = 'hint warn';
+      hint.textContent = 'Looks short — Indian mobiles have 10 digits.';
+      hint.hidden = false;
+    }
+  }
+  $('#phoneHint').addEventListener('click', function (e) {
+    var b = e.target.closest('[data-open]');
+    if (b) openLead(b.getAttribute('data-open'));
+  });
+
+  // draft autosave (survives reloads, e.g. when iOS reloads the page after using the camera)
+  var draftTimer;
+  function saveDraftSoon() { clearTimeout(draftTimer); draftTimer = setTimeout(saveDraft, 300); }
+  function saveDraft() {
+    clearTimeout(draftTimer);
+    var data = readForm(true);
+    if (!form.editingId && !form.photoIds.length && isBlank(data)) { lsDel(LS.draft); return; }
+    lsSet(LS.draft, JSON.stringify({ data: data, editingId: form.editingId, photoIds: form.photoIds, removedIds: form.removedIds }));
+  }
+  function restoreDraft() {
+    var d = null;
+    try { d = JSON.parse(lsGet(LS.draft) || 'null'); } catch (e) { d = null; }
+    var keep = {};
+    var ready = Promise.resolve();
+    if (d && d.data) {
+      if (d.editingId && !findLead(d.editingId)) d.editingId = null;
+      fillForm(d.data);
+      form.editingId = d.editingId || null;
+      form.removedIds = (d.removedIds || []).slice();
+      var ids = (d.photoIds || []).slice();
+      ready = Promise.all(ids.map(function (id) { return store.getPhoto(id); })).then(function (ps) {
+        form.photoIds = ids.filter(function (id, i) { return !!ps[i]; });
+        form.photoIds.forEach(function (id) { keep[id] = 1; });
+        if (form.editingId || form.photoIds.length || !isBlank(d.data)) toast('Restored your unsaved lead');
+      });
+    } else {
+      $('#f-by').value = lsGet(LS.by) || '';
+    }
+    return ready.then(function () {
+      return store.photoIdsFor(DRAFT);
+    }).then(function (ids) {
+      ids.forEach(function (id) { if (!keep[id]) store.delPhoto(id); });
+    }).catch(function () { /* nothing to clean */ }).then(function () {
+      renderPhotos();
+      renderEditState();
+    });
+  }
+
+  function resetForm() {
+    fillForm({ capturedBy: lsGet(LS.by) || '' });
+    form = { editingId: null, photoIds: [], removedIds: [] };
+    $('#nameErr').hidden = true;
+    $('#nameField').classList.remove('invalid');
+    $('#phoneHint').hidden = true;
+    lsDel(LS.draft);
+    renderPhotos();
+    renderEditState();
+  }
+  // Throw away the form, deleting photos that were only added to it.
+  function discardForm() {
+    var ids = form.photoIds.slice();
+    return Promise.all(ids.map(function (id) {
+      return store.getPhoto(id).then(function (p) {
+        if (p && p.leadId === DRAFT) { dropURL(id); return store.delPhoto(id); }
+      });
+    })).catch(function () { /* ignore */ }).then(resetForm);
+  }
+  function renderEditState() {
+    var l = form.editingId ? findLead(form.editingId) : null;
+    $('#editBanner').hidden = !l;
+    $('#editName').textContent = l ? l.name : '';
+    $('#saveLabel').textContent = l ? 'Update lead' : 'Save lead';
+    $('#btnReset').textContent = l ? 'Cancel' : 'Clear';
+  }
+
+  $('#btnReset').addEventListener('click', resetClicked);
+  $('#btnCancelEdit').addEventListener('click', resetClicked);
+  function resetClicked() {
+    if (form.editingId) {
+      if (!confirm('Stop editing? Changes you made will not be saved.')) return;
+      discardForm().then(function () { show('leads'); });
+      return;
+    }
+    if (!hasContent()) return;
+    if (!confirm('Clear this form? The details and photos you added will be removed.')) return;
+    discardForm();
+  }
+
+  var saving = false;
+  $('#btnSave').addEventListener('click', saveLead);
+  function saveLead() {
+    if (saving) return;
+    var d = readForm();
+    if (!d.name) {
+      $('#nameErr').hidden = false;
+      $('#nameField').classList.add('invalid');
+      $('#f-name').focus();
+      toast('Add the firm / visitor name first', 'err');
+      return;
+    }
+    saving = true;
+    $('#btnSave').disabled = true;
+    var now = new Date().toISOString();
+    var prev = form.editingId ? findLead(form.editingId) : null;
+    var lead = Object.assign({}, prev || {}, d, {
+      id: prev ? prev.id : uid('lead'),
+      timestamp: prev ? prev.timestamp : now,
+      updatedAt: now,
+      photoIds: form.photoIds.slice(),
+      ownerId: prev ? (prev.ownerId || '') : (api ? api.userId() : ''),
+      sync: 'pending'
+    });
+    var removed = form.removedIds.slice();
+    Promise.all(lead.photoIds.map(function (id) { return store.setPhotoLead(id, lead.id); }))
+      .then(function () { return store.putLead(lead); })
+      .then(function () {
+        removed.forEach(function (id) { dropURL(id); store.delPhoto(id); });
+        if (d.capturedBy) lsSet(LS.by, d.capturedBy);
+        if (prev) leads[leads.indexOf(prev)] = lead; else leads.push(lead);
+        sortLeads();
+        resetForm();
+        updateCounts();
+        renderDatalists();
+        if (navigator.vibrate) navigator.vibrate(25);
+        var n = lead.photoIds.length;
+        toast((prev ? 'Updated · ' : 'Saved · ') + lead.name + (n ? ' · ' + plural(n, 'photo') : ''), 'ok');
+        if (prev) show('leads'); else window.scrollTo(0, 0);
+        syncSoon();
+      })
+      .catch(function (err) {
+        toast('Could not save (' + ((err && err.message) || 'storage error') + '). Export your leads now.', 'err');
+      })
+      .then(function () { saving = false; $('#btnSave').disabled = false; });
+  }
+
+  // ---------- photos in the form ----------
+  function processImage(file) {
+    return new Promise(function (resolve) {
+      var url = URL.createObjectURL(file), img = new Image();
+      img.onload = function () {
+        var max = 1600, w = img.naturalWidth, h = img.naturalHeight, s = Math.min(1, max / Math.max(w, h));
+        var c = document.createElement('canvas');
+        c.width = Math.round(w * s); c.height = Math.round(h * s);
+        var ctx = c.getContext('2d');
+        ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+        ctx.drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        var done = function (b) { c.width = c.height = 0; resolve(b && b.size ? b : file); };
+        try {
+          if (c.toBlob) c.toBlob(done, 'image/jpeg', 0.82);
+          else done(dataURLtoBlob(c.toDataURL('image/jpeg', 0.82)));
+        } catch (e) { done(null); }
+      };
+      img.onerror = function () { URL.revokeObjectURL(url); resolve(file); };
+      img.src = url;
+    });
+  }
+  function addFiles(input) {
+    var files = Array.prototype.slice.call(input.files || []);
+    input.value = '';
+    if (!files.length) return;
+    var added = 0;
+    busy(files.length > 1 ? 'Adding photos…' : 'Adding photo…');
+    // one at a time keeps memory low on older phones
+    files.reduce(function (p, file, i) {
+      return p.then(function () {
+        if (files.length > 1) $('#busyText').textContent = 'Adding photo ' + (i + 1) + ' of ' + files.length + '…';
+        return processImage(file).then(function (blob) {
+          var id = uid('ph');
+          return store.putPhoto({ id: id, leadId: DRAFT, blob: blob, createdAt: new Date().toISOString() }).then(function () {
+            form.photoIds.push(id); added++;
+          });
+        });
+      });
+    }, Promise.resolve()).catch(function () {
+      toast('A photo could not be added', 'err');
+    }).then(function () {
+      busy(false);
+      renderPhotos();
+      saveDraft();
+      if (added > 1) toast(plural(added, 'photo') + ' added', 'ok');
+    });
+  }
+  $('#camInput').addEventListener('change', function () { addFiles(this); });
+  $('#galInput').addEventListener('change', function () { addFiles(this); });
+
+  function renderPhotos() {
+    var ids = form.photoIds.slice(), grid = $('#photoGrid');
+    $('#photoCount').textContent = ids.length ? '· ' + ids.length : '';
+    $('#photoEmpty').hidden = ids.length > 0;
+    grid.hidden = !ids.length;
+    grid.innerHTML = ids.map(function (id, i) {
+      return '<div class="ph" data-id="' + id + '"><button type="button" class="ph-open" data-i="' + i + '" aria-label="View photo ' + (i + 1) + '"><img alt=""></button>' +
+        '<button type="button" class="ph-rm" data-rm="' + id + '" aria-label="Remove photo ' + (i + 1) + '">' + ICON.x + '</button>' +
+        '<span class="ph-n">' + (i + 1) + '</span></div>';
+    }).join('');
+    ids.forEach(function (id) {
+      photoURL(id).then(function (u) { var img = $('.ph[data-id="' + id + '"] img', grid); if (img && u) img.src = u; });
+    });
+  }
+  $('#photoGrid').addEventListener('click', function (e) {
+    var rm = e.target.closest('[data-rm]');
+    if (rm) { removeFormPhoto(rm.getAttribute('data-rm')); return; }
+    var op = e.target.closest('.ph-open');
+    if (op) openViewer(form.photoIds.slice(), +op.getAttribute('data-i'));
+  });
+  function removeFormPhoto(id) {
+    if (!confirm('Remove this photo?')) return;
+    store.getPhoto(id).then(function (p) {
+      if (p && p.leadId === DRAFT) { dropURL(id); return store.delPhoto(id); }
+      form.removedIds.push(id); // already saved with the lead: delete only when the edit is saved
+    }).then(function () {
+      form.photoIds = form.photoIds.filter(function (x) { return x !== id; });
+      renderPhotos();
+      saveDraft();
+    });
+  }
+
+  // ---------- photo viewer ----------
+  var V = { ids: [], i: 0 };
+  function openViewer(ids, i) {
+    if (!ids.length) return;
+    V.ids = ids; V.i = Math.max(0, Math.min(i, ids.length - 1));
+    $('#viewer').classList.add('show');
+    pushLayer('viewer');
+    paintViewer();
+  }
+  function paintViewer() {
+    var id = V.ids[V.i];
+    $('#vCount').textContent = V.ids.length > 1 ? (V.i + 1) + ' / ' + V.ids.length : '';
+    $('#vPrev').hidden = V.i <= 0;
+    $('#vNext').hidden = V.i >= V.ids.length - 1;
+    photoURL(id).then(function (u) { if (V.ids[V.i] === id) $('#vImg').src = u; });
+  }
+  function stepViewer(d) { var n = V.i + d; if (n >= 0 && n < V.ids.length) { V.i = n; paintViewer(); } }
+  $('#vClose').addEventListener('click', function () { closeLayer('viewer'); });
+  $('#vPrev').addEventListener('click', function () { stepViewer(-1); });
+  $('#vNext').addEventListener('click', function () { stepViewer(1); });
+  (function () {
+    var x0 = null, y0 = 0;
+    var stage = $('#vStage');
+    stage.addEventListener('touchstart', function (e) { if (e.touches.length === 1) { x0 = e.touches[0].clientX; y0 = e.touches[0].clientY; } else x0 = null; }, { passive: true });
+    stage.addEventListener('touchend', function (e) {
+      if (x0 === null) return;
+      var t = e.changedTouches[0], dx = t.clientX - x0, dy = t.clientY - y0;
+      x0 = null;
+      if (Math.abs(dx) > 50 && Math.abs(dx) > Math.abs(dy) * 1.5) stepViewer(dx < 0 ? 1 : -1);
+    }, { passive: true });
+  })();
+  document.addEventListener('keydown', function (e) {
+    if ($('#viewer').classList.contains('show')) {
+      if (e.key === 'Escape') closeLayer('viewer');
+      if (e.key === 'ArrowLeft') stepViewer(-1);
+      if (e.key === 'ArrowRight') stepViewer(1);
+    } else if (e.key === 'Escape' && $('#overlay').classList.contains('show')) closeSheet();
+  });
+
+  // ---------- leads list ----------
+  var searchTimer;
+  $('#q').addEventListener('input', function () { clearTimeout(searchTimer); searchTimer = setTimeout(renderLeads, 120); });
+  $('#stPendingBox').addEventListener('click', function () { show('backup'); });
+
+  function renderLeads() {
+    var q = $('#q').value.trim().toLowerCase();
+    var list = !q ? leads : leads.filter(function (l) {
+      return [l.name, l.pocName, l.city, l.phone, l.product, l.notes, l.capturedBy, l.softwareName, l.action].join(' ').toLowerCase().indexOf(q) >= 0;
+    });
+    var today = dayKey(new Date());
+    $('#stTotal').textContent = leads.length;
+    $('#stToday').textContent = leads.filter(function (l) { return dayKey(l.timestamp) === today; }).length;
+    var pend = attentionCount();
+    $('#stPendingLabel').textContent = cloudOn() ? 'Not synced' : 'Not backed up';
+    $('#stPending').textContent = pend;
+    $('#stPendingBox').classList.toggle('alert', pend > 0);
+
+    var box = $('#leadList');
+    $('#leadEmpty').hidden = leads.length > 0;
+    if (!leads.length) { box.innerHTML = ''; return; }
+    if (!list.length) { box.innerHTML = '<p class="empty">No leads match “' + esc(q) + '”.</p>'; return; }
+
+    var perDay = {};
+    list.forEach(function (l) { var k = dayKey(l.timestamp); perDay[k] = (perDay[k] || 0) + 1; });
+    var html = '', last = '';
+    list.forEach(function (l) {
+      var k = dayKey(l.timestamp);
+      if (k !== last) { html += '<h3 class="day"><span>' + esc(dayLabel(l.timestamp)) + '</span><span>' + perDay[k] + '</span></h3>'; last = k; }
+      html += leadCard(l);
+    });
+    box.innerHTML = html;
+    loadThumbs(box);
+  }
+  function initials(name) {
+    return (name || '?').trim().split(/\s+/).slice(0, 2).map(function (w) { return w.charAt(0); }).join('').toUpperCase();
+  }
+  function leadCard(l) {
+    var n = (l.photoIds || []).length;
+    var sub = [l.pocName, l.city].filter(Boolean).join(' · ') || l.phone || 'No contact details';
+    var tags = [];
+    if (l.action) tags.push('<span class="tag' + (l.action === 'Demo slot booked' ? ' hot' : '') + '">' + esc(l.action) + '</span>');
+    if (l.profile) tags.push('<span class="tag">' + esc(l.profile) + '</span>');
+    if (l.capturedBy) tags.push('<span class="tag">by ' + esc(l.capturedBy) + '</span>');
+    return '<button type="button" class="lead" data-id="' + esc(l.id) + '">' +
+      '<span class="thumb"' + (n ? ' data-photo="' + esc(l.photoIds[0]) + '"' : '') + '>' + esc(initials(l.name)) +
+      (n > 1 ? '<span class="ph-n">' + n + '</span>' : '') + '</span>' +
+      '<span class="lead-main"><span class="lead-title">' + esc(l.name) + '</span><span class="lead-sub">' + esc(sub) + '</span>' +
+      (tags.length ? '<span class="tags">' + tags.join('') + '</span>' : '') + '</span>' +
+      '<span class="lead-time">' + esc(fmtTime(l.timestamp)) + syncTag(l) + '</span></button>';
+  }
+  var thumbObserver = 'IntersectionObserver' in window ? new IntersectionObserver(function (entries) {
+    entries.forEach(function (en) { if (en.isIntersecting) { thumbObserver.unobserve(en.target); fillThumb(en.target); } });
+  }, { rootMargin: '200px' }) : null;
+  function fillThumb(el) {
+    photoURL(el.getAttribute('data-photo')).then(function (u) {
+      if (!u) return;
+      var img = document.createElement('img');
+      img.alt = ''; img.src = u;
+      el.insertBefore(img, el.firstChild);
+    });
+  }
+  function loadThumbs(root) {
+    $$('.thumb[data-photo]', root).forEach(function (el) { if (thumbObserver) thumbObserver.observe(el); else fillThumb(el); });
+  }
+  $('#leadList').addEventListener('click', function (e) {
+    var c = e.target.closest('.lead');
+    if (c) openLead(c.getAttribute('data-id'));
+  });
+
+  // ---------- lead detail sheet ----------
+  function openLead(id) {
+    var l = findLead(id);
+    if (!l) return;
+    var ids = (l.photoIds || []).slice();
+    var wa = waNumber(l.phone);
+    var rows = [
+      ['Owner / POC', l.pocName], ['Phone', l.phone], ['City', l.city],
+      ['Profile', [l.profile, l.profileDetail].filter(Boolean).join(' – ')],
+      ['Stores', [l.stores, l.storeCount ? l.storeCount + ' stores' : ''].filter(Boolean).join(' – ')],
+      ['Store size', l.size],
+      ['Software', [l.softwareType, l.softwareName].filter(Boolean).join(': ')],
+      ['Reason', [l.reason, l.reasonDetail].filter(Boolean).join(' – ')],
+      ['Products', l.product],
+      ['Next action', [l.action, l.actionDetail].filter(Boolean).join(' – ')],
+      ['Notes', l.notes], ['Captured by', l.capturedBy],
+      ['Captured', fmtDateTime(l.timestamp)],
+      ['Edited', l.updatedAt && l.updatedAt !== l.timestamp ? fmtDateTime(l.updatedAt) : ''],
+      ['Team list', !cloudOn() ? '' : l.imported ? 'Imported from a teammate (not uploaded)' : l.sync === 'synced' ? 'Synced ' + fmtDateTime(l.syncedAt) : 'Waiting to sync']
+    ].filter(function (r) { return r[1]; });
+
+    var sheet = openSheet(
+      '<div class="sheet-head"><div><h2>' + esc(l.name) + '</h2><p>' + esc([l.pocName, l.city].filter(Boolean).join(' · ')) + '</p></div>' +
+      '<button type="button" class="icon-btn" data-act="close" aria-label="Close">' + ICON.close + '</button></div>' +
+      '<div class="quick">' +
+        (l.phone ? '<a class="btn btn-secondary" href="tel:' + esc(String(l.phone).replace(/[^\d+]/g, '')) + '">' + ICON.phone + 'Call</a>' : '<button class="btn btn-secondary" disabled>' + ICON.phone + 'Call</button>') +
+        (wa ? '<a class="btn btn-secondary" href="https://wa.me/' + wa + '" target="_blank" rel="noopener">' + ICON.chat + 'WhatsApp</a>' : '<button class="btn btn-secondary" disabled>' + ICON.chat + 'WhatsApp</button>') +
+        '<button type="button" class="btn btn-secondary" data-act="edit">' + ICON.edit + 'Edit</button>' +
+      '</div>' +
+      (ids.length ? '<div class="strip">' + ids.map(function (pid, i) { return '<button type="button" data-view-i="' + i + '" aria-label="Photo ' + (i + 1) + '"><img alt="" data-pid="' + pid + '"></button>'; }).join('') + '</div>' +
+        '<button type="button" class="btn btn-outline btn-block" data-act="savephotos">' + ICON.share + 'Save ' + (ids.length > 1 ? 'all ' + ids.length + ' photos' : 'photo') + ' to phone</button>' : '') +
+      '<dl class="kv">' + rows.map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('') + '</dl>' +
+      '<div class="sep"></div>' +
+      '<button type="button" class="btn btn-danger btn-block" data-act="delete">Delete this lead</button>'
+    );
+    $$('img[data-pid]', sheet).forEach(function (img) { photoURL(img.getAttribute('data-pid')).then(function (u) { if (u) img.src = u; }); });
+
+    // Prepare photo files now so the share sheet opens straight from the tap (iOS needs that).
+    var photoFiles = [];
+    Promise.all(ids.map(function (pid, i) {
+      return store.getPhoto(pid).then(function (p) {
+        if (p && p.blob) photoFiles[i] = new File([p.blob], slug(l.name) + '_' + (i + 1) + '.' + extFor(p.blob.type), { type: p.blob.type || 'image/jpeg' });
+      });
+    }));
+
+    sheet.onclick = function (e) {
+      var v = e.target.closest('[data-view-i]');
+      if (v) { openViewer(ids, +v.getAttribute('data-view-i')); return; }
+      var a = e.target.closest('[data-act]');
+      if (!a) return;
+      var act = a.getAttribute('data-act');
+      if (act === 'close') closeSheet();
+      if (act === 'edit') { closeSheet(); startEdit(id); }
+      if (act === 'delete') deleteLead(id);
+      if (act === 'savephotos') savePhotos(photoFiles.filter(Boolean));
+    };
+  }
+  function savePhotos(files) {
+    if (!files.length) { toast('Photos are still loading — try again', 'err'); return; }
+    if (navigator.canShare && navigator.canShare({ files: files })) {
+      navigator.share({ files: files }).catch(function (err) {
+        if (err && err.name !== 'AbortError') files.forEach(function (f, i) { setTimeout(function () { download(f, f.name); }, i * 400); });
+      });
+    } else {
+      files.forEach(function (f, i) { setTimeout(function () { download(f, f.name); }, i * 400); });
+      toast('Downloading ' + plural(files.length, 'photo'), 'ok');
+    }
+  }
+  function startEdit(id) {
+    var l = findLead(id);
+    if (!l) return;
+    if (form.editingId === id) { show('new'); return; }
+    if (hasContent() && !confirm('The form has an unsaved lead. Discard it and edit “' + l.name + '” instead?')) return;
+    discardForm().then(function () {
+      fillForm(l);
+      form.editingId = id;
+      form.photoIds = (l.photoIds || []).slice();
+      form.removedIds = [];
+      renderPhotos();
+      renderEditState();
+      saveDraft();
+      show('new');
+    });
+  }
+  function deleteLead(id) {
+    var l = findLead(id);
+    if (!l) return;
+    var n = (l.photoIds || []).length;
+    var where = l.remote ? ' from this phone and the team list' : ' from this phone';
+    if (!confirm('Delete “' + l.name + '”' + (n ? ' and its ' + plural(n, 'photo') : '') + where + '? This cannot be undone.')) return;
+    // Already on the server: tell it on the next sync (admins can still restore it).
+    if (cloudOn() && l.remote) setTombstones(tombstones().concat([{ id: id, at: new Date().toISOString() }]));
+    Promise.all((l.photoIds || []).map(function (pid) { dropURL(pid); return store.delPhoto(pid); }))
+      .then(function () { return store.delLead(id); })
+      .then(function () {
+        leads = leads.filter(function (x) { return x.id !== id; });
+        if (form.editingId === id) resetForm();
+        closeSheet();
+        renderLeads();
+        updateCounts();
+        toast('Lead deleted');
+        syncSoon();
+      });
+  }
+
+  // ---------- ZIP reader (writer lives in lib.js) ----------
+  var ZipWriter = IIJS.ZipWriter;
+  function readZip(file) {
+    return blobToBuf(file).then(function (buf) {
+      var u8 = new Uint8Array(buf), dv = new DataView(buf), eocd = -1;
+      for (var i = u8.length - 22; i >= Math.max(0, u8.length - 65557); i--) {
+        if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+      }
+      if (eocd < 0) throw new Error('not a ZIP file');
+      var n = dv.getUint16(eocd + 10, true), p = dv.getUint32(eocd + 16, true), entries = [];
+      for (var k = 0; k < n && p + 46 <= u8.length; k++) {
+        if (dv.getUint32(p, true) !== 0x02014b50) break;
+        var nl = dv.getUint16(p + 28, true), xl = dv.getUint16(p + 30, true), cl = dv.getUint16(p + 32, true);
+        entries.push({
+          name: dec.decode(u8.subarray(p + 46, p + 46 + nl)),
+          method: dv.getUint16(p + 10, true), csize: dv.getUint32(p + 20, true), off: dv.getUint32(p + 42, true)
+        });
+        p += 46 + nl + xl + cl;
+      }
+      entries = entries.filter(function (e) { return !/\/$/.test(e.name) && e.name.indexOf('__MACOSX/') < 0 && !/(^|\/)\._/.test(e.name); });
+      function data(e) {
+        var start = e.off + 30 + dv.getUint16(e.off + 26, true) + dv.getUint16(e.off + 28, true);
+        var raw = u8.subarray(start, start + e.csize);
+        if (e.method === 0) return Promise.resolve(raw);
+        if (e.method === 8 && typeof DecompressionStream !== 'undefined') {
+          var stream = new Blob([raw]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+          return new Response(stream).arrayBuffer().then(function (b) { return new Uint8Array(b); });
+        }
+        return Promise.reject(new Error('this phone cannot open compressed ZIPs — import the original file'));
+      }
+      return { entries: entries, data: data };
+    });
+  }
+
+  // ---------- CSV ----------
+  function parseCSV(text) {
+    text = text.replace(/^\uFEFF/, '');
+    var rows = [], row = [], cur = '', q = false;
+    for (var i = 0; i < text.length; i++) {
+      var ch = text[i];
+      if (q) {
+        if (ch === '"') { if (text[i + 1] === '"') { cur += '"'; i++; } else q = false; } else cur += ch;
+      } else if (ch === '"') q = true;
+      else if (ch === ',') { row.push(cur); cur = ''; }
+      else if (ch === '\n' || ch === '\r') {
+        if (ch === '\r' && text[i + 1] === '\n') i++;
+        row.push(cur); rows.push(row); row = []; cur = '';
+      } else cur += ch;
+    }
+    if (cur !== '' || row.length) { row.push(cur); rows.push(row); }
+    rows = rows.filter(function (r) { return r.some(function (c) { return c.trim() !== ''; }); });
+    if (rows.length < 2) return [];
+    var head = rows[0].map(function (h) { h = h.trim(); return HEADER_TO_KEY[h.toLowerCase()] || h; });
+    return rows.slice(1).map(function (r) {
+      var o = {};
+      head.forEach(function (h, i) { o[h] = r[i] || ''; });
+      return o;
+    });
+  }
+
+  // ---------- export ----------
+  function exportName(ext) {
+    var d = new Date(), by = slug(lsGet(LS.by) || '');
+    return 'IIJS_leads_' + (by !== 'lead' ? by + '_' : '') + d.getFullYear() + '-' + pad(d.getMonth() + 1) + '-' + pad(d.getDate()) + '_' + pad(d.getHours()) + pad(d.getMinutes()) + '.' + ext;
+  }
+  function buildExport(withPhotos) {
+    var list = leads.slice().sort(function (a, b) { return a.timestamp < b.timestamp ? -1 : 1; });
+    var zip = withPhotos ? new ZipWriter() : null;
+    var records = [], totalPhotos = 0, done = 0;
+    list.forEach(function (l) { totalPhotos += (l.photoIds || []).length; });
+
+    return list.reduce(function (p, l, idx) {
+      return p.then(function () {
+        var sr = idx + 1, files = [];
+        records.push({ sr: sr, lead: l, files: files });
+        if (!withPhotos) return;
+        return (l.photoIds || []).reduce(function (pp, pid, k) {
+          return pp.then(function () { return store.getPhoto(pid); }).then(function (ph) {
+            done++;
+            if (!ph || !ph.blob) return;
+            $('#busyText').textContent = 'Packing photo ' + done + ' of ' + totalPhotos + '…';
+            var name = 'photos/' + ('00' + sr).slice(-3) + '_' + slug(l.name) + '_' + (k + 1) + '.' + extFor(ph.blob.type);
+            return blobToBuf(ph.blob).then(function (buf) { zip.add(name, new Uint8Array(buf), ph.blob); files.push(name); });
+          });
+        }, Promise.resolve());
+      });
+    }, Promise.resolve()).then(function () {
+      var csv = IIJS.buildCSV(records);
+      if (!withPhotos) return { blob: new Blob([csv], { type: 'text/csv' }), name: exportName('csv'), photos: 0 };
+      zip.add(exportName('csv').replace(/^IIJS_leads/, 'IIJS_leads_sheet'), enc.encode(csv));
+      var json = {
+        app: 'IIJS Lead Capture', format: 2, exportedAt: new Date().toISOString(),
+        leads: records.map(function (r) {
+          var o = Object.assign({}, r.lead, { photoFiles: r.files });
+          delete o.photoIds;
+          return o;
+        })
+      };
+      zip.add('leads.json', enc.encode(JSON.stringify(json)));
+      return { blob: zip.blob(), name: exportName('zip'), photos: totalPhotos };
+    });
+  }
+  function runExport(withPhotos) {
+    if (!leads.length) { toast('No leads to export yet', 'err'); return; }
+    busy('Preparing export…');
+    buildExport(withPhotos).then(function (out) {
+      busy(false);
+      offerFile(out.blob, out.name, plural(leads.length, 'lead') + (withPhotos ? ' · ' + plural(out.photos, 'photo') : ''));
+    }).catch(function (e) {
+      busy(false);
+      toast('Export failed: ' + ((e && e.message) || 'unknown error'), 'err');
+    });
+  }
+  $('#btnExportZip').addEventListener('click', function () { runExport(true); });
+  $('#btnExportCsv').addEventListener('click', function () { runExport(false); });
+
+  function download(blob, name) {
+    var url = URL.createObjectURL(blob), a = document.createElement('a');
+    a.href = url; a.download = name; a.rel = 'noopener';
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+  }
+  function markExported() {
+    lsSet(LS.lastExport, new Date().toISOString());
+    updateCounts();
+    if (document.body.getAttribute('data-view') === 'backup') renderBackup();
+  }
+  // Shown as a second step so "Share" runs straight from a tap (iOS requires it).
+  function offerFile(blob, name, summary) {
+    var file;
+    try { file = new File([blob], name, { type: blob.type }); } catch (e) { file = null; }
+    var canShare = !!(file && navigator.canShare && navigator.canShare({ files: [file] }));
+    var sheet = openSheet(
+      '<div class="sheet-head"><div><h2>Export ready</h2><p>Keep a copy off this phone.</p></div>' +
+      '<button type="button" class="icon-btn" data-act="close" aria-label="Close">' + ICON.close + '</button></div>' +
+      '<div class="filecard">' + ICON.file + '<div><b>' + esc(name) + '</b><span>' + esc(fmtBytes(blob.size) + ' · ' + summary) + '</span></div></div>' +
+      '<div class="stack">' +
+      (canShare ? '<button type="button" class="btn btn-primary btn-block" data-act="share">' + ICON.share + (isIOS ? 'Share / Save to Files' : 'Share (WhatsApp, Gmail, Drive…)') + '</button>' : '') +
+      '<button type="button" class="btn ' + (canShare ? 'btn-outline' : 'btn-primary') + ' btn-block" data-act="download">Download to this phone</button>' +
+      '</div>' +
+      '<p class="hint" style="margin-top:12px">' + (isIOS
+        ? 'iPhone: in the share menu pick <b>Save to Files</b>, WhatsApp or Mail. Downloads go to Files › Downloads.'
+        : canShare ? 'Android: share to WhatsApp, Gmail or Drive — or download it to the phone’s Downloads folder.'
+          : 'Android: the file goes to your Downloads folder. Open Files › Downloads to send it on WhatsApp, Gmail or Drive.') + '</p>'
+    );
+    sheet.onclick = function (e) {
+      var a = e.target.closest('[data-act]');
+      if (!a) return;
+      var act = a.getAttribute('data-act');
+      if (act === 'close') closeSheet();
+      if (act === 'download') { download(blob, name); markExported(); toast('Saved to Downloads', 'ok'); }
+      if (act === 'share') {
+        navigator.share({ files: [file], title: name }).then(function () {
+          markExported(); toast('Shared', 'ok'); closeSheet();
+        }).catch(function (err) {
+          if (err && err.name !== 'AbortError') toast('Sharing did not work — use Download instead', 'err');
+        });
+      }
+    };
+  }
+
+  // ---------- import ----------
+  function cleanLead(src) {
+    var ts = validISO(src.timestamp) || new Date().toISOString();
+    var l = { id: String(src.id || '').trim() || uid('lead'), timestamp: ts, updatedAt: validISO(src.updatedAt) || ts, photoIds: [] };
+    LEAD_KEYS.forEach(function (k) { l[k] = String(src[k] == null ? '' : src[k]).trim(); });
+    return l;
+  }
+  $('#importInput').addEventListener('change', function () {
+    var files = Array.prototype.slice.call(this.files || []);
+    this.value = '';
+    if (files.length) importFiles(files);
+  });
+  function importFiles(files) {
+    var have = {}, added = 0, skipped = 0, photos = 0, failed = [];
+    leads.forEach(function (l) { have[l.id] = 1; });
+    busy('Importing…');
+
+    function addLeads(incoming, z, byName, byBase) {
+      return incoming.reduce(function (p, src) {
+        return p.then(function () {
+          if (!src || !(src.name || src.pocName || src.phone)) return;
+          if (src.id && have[src.id]) { skipped++; return; }
+          var lead = cleanLead(src);
+          lead.imported = true; // a teammate's lead: never uploaded from this phone
+          var pfs = Array.isArray(src.photoFiles) ? src.photoFiles : String(src.photoFiles || '').split('|');
+          return pfs.map(function (s) { return String(s).trim(); }).filter(Boolean).reduce(function (pp, pf) {
+            return pp.then(function () {
+              if (!z) return;
+              var e = byName[pf] || byName['photos/' + pf] || byBase[pf.split('/').pop()];
+              if (!e) return;
+              return z.data(e).then(function (u8) {
+                var pid = uid('ph');
+                return store.putPhoto({ id: pid, leadId: lead.id, blob: new Blob([u8], { type: mimeFor(e.name) }), createdAt: lead.timestamp }).then(function () {
+                  lead.photoIds.push(pid); photos++;
+                });
+              });
+            });
+          }, Promise.resolve()).then(function () {
+            return store.putLead(lead);
+          }).then(function () {
+            leads.push(lead); have[lead.id] = 1; added++;
+          });
+        });
+      }, Promise.resolve());
+    }
+
+    files.reduce(function (p, f) {
+      return p.then(function () {
+        $('#busyText').textContent = 'Importing ' + f.name + '…';
+        if (/\.zip$/i.test(f.name) || /zip/.test(f.type)) {
+          return readZip(f).then(function (z) {
+            var byName = {}, byBase = {};
+            z.entries.forEach(function (e) { byName[e.name] = e; byBase[e.name.split('/').pop()] = e; });
+            var je = z.entries.filter(function (e) { return /(^|\/)leads\.json$/i.test(e.name); })[0];
+            var ce = z.entries.filter(function (e) { return /\.csv$/i.test(e.name); })[0];
+            if (je) return z.data(je).then(function (u8) { return addLeads(JSON.parse(dec.decode(u8)).leads || [], z, byName, byBase); });
+            if (ce) return z.data(ce).then(function (u8) { return addLeads(parseCSV(dec.decode(u8)), z, byName, byBase); });
+            throw new Error('no leads inside');
+          });
+        }
+        if (/\.(csv|txt)$/i.test(f.name) || /csv|text/.test(f.type)) {
+          return blobToText(f).then(function (t) { return addLeads(parseCSV(t), null, {}, {}); });
+        }
+        if (/\.json$/i.test(f.name)) {
+          return blobToText(f).then(function (t) { return addLeads(JSON.parse(t).leads || [], null, {}, {}); });
+        }
+        throw new Error('not a ZIP or CSV');
+      }).catch(function () { failed.push(f.name); });
+    }, Promise.resolve()).then(function () {
+      busy(false);
+      sortLeads();
+      updateCounts();
+      renderDatalists();
+      renderBackup();
+      var msg = 'Imported ' + plural(added, 'lead') + (photos ? ' with ' + plural(photos, 'photo') : '') + (skipped ? ' · ' + skipped + ' already here' : '');
+      if (failed.length) toast(msg + ' · could not read ' + failed.join(', '), 'err');
+      else toast(msg, 'ok');
+    });
+  }
+
+  // ---------- clear device ----------
+  $('#btnClear').addEventListener('click', function () {
+    if (!leads.length) { toast('Nothing to delete'); return; }
+    var pend = attentionCount();
+    var what = cloudOn() ? 'synced' : 'exported';
+    var msg = 'Delete all ' + plural(leads.length, 'lead') + ' and their photos from this phone? This cannot be undone.' +
+      (cloudOn() ? ' Leads already synced stay in the team list.' : '');
+    if (pend) msg += '\n\n' + plural(pend, 'lead') + ' have not been ' + what + ' yet.';
+    if (!confirm(msg)) return;
+    if (pend && !confirm('Last check: leads that are not ' + what + ' will be lost for good. Delete anyway?')) return;
+    store.clear().then(function () {
+      Object.keys(urlCache).forEach(dropURL);
+      leads = [];
+      resetForm();
+      lsDel(LS.lastExport);
+      updateCounts();
+      renderBackup();
+      toast('All leads deleted from this phone', 'ok');
+    });
+  });
+
+  // ---------- counts, banners, backup screen ----------
+  function updateCounts() {
+    var today = dayKey(new Date()), nToday = leads.filter(function (l) { return dayKey(l.timestamp) === today; }).length;
+    $('#hdrSub').textContent = leads.length ? nToday + ' today · ' + leads.length + ' total' : 'Booth lead capture';
+    $('#tabBadge').textContent = leads.length > 999 ? '999+' : leads.length;
+    $('#tabBadge').hidden = !leads.length;
+    $('#backupDot').hidden = attentionCount() === 0;
+    renderSyncState();
+    if (document.body.getAttribute('data-view') === 'leads') renderLeads();
+  }
+  function renderDatalists() {
+    function fill(id, key) {
+      var freq = {};
+      leads.forEach(function (l) { var v = (l[key] || '').trim(); if (v) freq[v] = (freq[v] || 0) + 1; });
+      $('#' + id).innerHTML = Object.keys(freq).sort(function (a, b) { return freq[b] - freq[a]; }).slice(0, 40)
+        .map(function (v) { return '<option value="' + esc(v) + '">'; }).join('');
+    }
+    fill('dl-city', 'city'); fill('dl-product', 'product'); fill('dl-software', 'softwareName'); fill('dl-by', 'capturedBy');
+  }
+  function renderNewBanners() {
+    var html = '';
+    if (cloudOn() && api.session && api.session.expired) {
+      html += '<div class="banner warn">' + ICON.alert + '<div><b>Log in again to keep syncing</b>Your login expired or was changed. Leads are still saved on this phone. <button type="button" class="linkish" data-login>Log in</button></div></div>';
+    } else if (cloudOn() && !api.session) {
+      html += '<div class="banner warn">' + ICON.alert + '<div><b>Not logged in</b>Leads stay on this phone until you log in. Then they go to the team list automatically. <button type="button" class="linkish" data-login>Log in</button></div></div>';
+    }
+    if (!store.persistent) {
+      html += '<div class="banner warn">' + ICON.alert + '<div><b>This browser is blocking storage</b>Leads you add will be lost if this tab closes. Export after every few leads, or open the app link in Safari (iPhone) / Chrome (Android).</div></div>';
+    } else if (isHttp && !isStandalone() && !lsGet(LS.hideInstall)) {
+      html += '<div class="banner info">' + ICON.info + '<div><b>Add to Home Screen for offline use</b>' +
+        (isIOS ? 'Tap Share <span aria-hidden="true">⎙</span> → <b style="display:inline">Add to Home Screen</b>, then open it from the icon.' : 'Install it once, then it opens without internet.') +
+        ' <button type="button" class="linkish" data-goto="backup">How</button></div>' +
+        '<button type="button" class="x" id="hideInstall" aria-label="Dismiss">' + ICON.x + '</button></div>';
+    }
+    $('#newBanners').innerHTML = html;
+    var x = $('#hideInstall');
+    if (x) x.addEventListener('click', function () { lsSet(LS.hideInstall, '1'); renderNewBanners(); });
+  }
+  function installHelpHTML() {
+    if (isStandalone()) {
+      return '<div class="okline">' + ICON.check + 'Installed — opens and saves leads without internet.</div>' +
+        '<p class="small muted">Always open it from the home-screen icon: leads saved in the browser tab and in the app are kept separately.</p>';
+    }
+    if (!isHttp) {
+      return '<p class="small">You opened this as a file. That works on Android Chrome, but iPhones cannot run app files from Files or WhatsApp. ' +
+        'For both phones, host it once at a web link (see README) and add it to the Home Screen.</p>';
+    }
+    if (isIOS) {
+      return '<ol class="steps small"><li>Open this page in <b>Safari</b> while you have internet.</li>' +
+        '<li>Tap <b>Share</b> (square with arrow) → <b>Add to Home Screen</b> → Add.</li>' +
+        '<li>Open <b>IIJS Leads</b> from the home screen. It now works in airplane mode.</li></ol>' +
+        '<p class="small muted">Use the icon every time — Safari tabs and the home-screen app keep separate lists.</p>';
+    }
+    return (installPrompt ? '<button type="button" class="btn btn-primary btn-block" id="btnInstall" style="margin-bottom:12px">Install app on this phone</button>' : '') +
+      '<ol class="steps small"><li>Open this page in <b>Chrome</b> while you have internet.</li>' +
+      '<li>Tap <b>⋮</b> → <b>Add to Home screen</b> (or <b>Install app</b>).</li>' +
+      '<li>Open <b>IIJS Leads</b> from the home screen. It now works with no signal.</li></ol>' +
+      '<p class="small muted">' + (offlineReady ? 'This page is already saved for offline use on this phone.' : 'Saving for offline use…') + '</p>';
+  }
+  function renderBackup() {
+    renderAccount();
+    $('#combineCard').hidden = cloudOn();
+    var nPhotos = 0;
+    leads.forEach(function (l) { nPhotos += (l.photoIds || []).length; });
+    var last = lastExport(), pend = cloudOn() ? 0 : pendingCount();
+    if (cloudOn()) {
+      $('#backupStatus').innerHTML = '<b>' + plural(leads.length, 'lead') + '</b> and <b>' + plural(nPhotos, 'photo') + '</b> on this phone.<br>' +
+        '<span class="muted">Synced leads are already safe in the team list. Export is an extra copy for yourself.</span>';
+    } else $('#backupStatus').innerHTML = '<b>' + plural(leads.length, 'lead') + '</b> and <b>' + plural(nPhotos, 'photo') + '</b> on this phone.<br>' +
+      '<span class="' + (pend ? '' : 'muted') + '" style="' + (pend ? 'color:#D9480F;font-weight:600' : '') + '">' +
+      (last ? 'Last export ' + esc(fmtDateTime(last)) + '. ' : 'Not exported yet. ') +
+      (pend ? plural(pend, 'lead') + ' not in any export.' : (leads.length ? 'Everything is backed up.' : '')) + '</span>';
+    $('#installHelp').innerHTML = installHelpHTML();
+    var ib = $('#btnInstall');
+    if (ib) ib.addEventListener('click', function () {
+      installPrompt.prompt();
+      installPrompt.userChoice.then(function () { installPrompt = null; renderBackup(); });
+    });
+    var rows = [
+      ['Storage', store.persistent ? 'Saved on this phone' : 'Temporary (export often)'],
+      ['Works offline', isStandalone() ? 'Yes — installed' : offlineReady ? 'Yes' : isHttp ? 'After install' : 'Opened as file'],
+      ['App version', APP_VERSION]
+    ];
+    $('#deviceInfo').innerHTML = rows.map(function (r) { return '<dt>' + esc(r[0]) + '</dt><dd>' + esc(r[1]) + '</dd>'; }).join('');
+    if (navigator.storage && navigator.storage.estimate) {
+      navigator.storage.estimate().then(function (e) {
+        if (!e || !e.usage) return;
+        $('#deviceInfo').insertAdjacentHTML('beforeend', '<dt>Space used</dt><dd>' + esc(fmtBytes(e.usage)) + '</dd>');
+      }).catch(function () { /* not available */ });
+    }
+  }
+
+  // ---------- login + cloud sync ----------
+  // Leads are always saved on the phone first; when logged in and online they are uploaded
+  // (photos, then the lead row). Anything that fails simply stays "waiting" and is retried.
+  var LS_TOMB = 'iijs_tombstones', LS_PROFILE = 'iijs_profile', LS_SKIP = 'iijs_skip_login', LS_LASTSYNC = 'iijs_last_sync';
+  var sync = { running: null, error: '', timer: null };
+  var me = null;
+  try { me = JSON.parse(lsGet(LS_PROFILE) || 'null'); } catch (e) { me = null; }
+
+  function cloudOn() { return !!api; }
+  function canSync() { return cloudOn() && !!api.session && !api.session.expired; }
+  function tombstones() { try { return JSON.parse(lsGet(LS_TOMB) || '[]'); } catch (e) { return []; } }
+  function setTombstones(t) { lsSet(LS_TOMB, JSON.stringify(t)); }
+  function mine(l) { return !l.imported && (!l.ownerId || !api.userId() || l.ownerId === api.userId()); }
+  function unsyncedCount() {
+    if (!cloudOn()) return 0;
+    return leads.filter(function (l) { return l.sync !== 'synced' && mine(l); }).length + tombstones().length;
+  }
+  function attentionCount() { return cloudOn() ? unsyncedCount() : pendingCount(); }
+  function syncTag(l) {
+    if (!cloudOn() || l.imported) return '';
+    return l.sync === 'synced' ? '<span class="sync-tag ok">✓ Synced</span>' : '<span class="sync-tag wait">Not synced</span>';
+  }
+  function friendly(e) {
+    if (!e) return 'Unknown problem';
+    if (e.name === 'TypeError') return 'Could not reach the server. Check the internet connection.';
+    if (e.code === 'invalid_credentials' || /invalid login/i.test(e.message)) return 'Wrong email or password.';
+    if (e.code === 'user_banned' || /banned/i.test(e.message)) return 'This login has been switched off by your admin.';
+    if (/row-level security|violates/i.test(e.message)) return 'This login is not allowed to save leads. Ask your admin to check that it is active.';
+    return e.message || String(e);
+  }
+
+  function renderSyncState() {
+    var pill = $('#storePill'), text = $('#storePillText'), n = unsyncedCount();
+    var state, label;
+    if (!cloudOn()) { state = store.persistent ? 'ok' : 'warn'; label = store.persistent ? 'Saved on phone' : 'Temporary'; }
+    else if (!api.session) { state = 'warn'; label = 'Not logged in'; }
+    else if (api.session.expired) { state = 'warn'; label = 'Log in again'; }
+    else if (sync.running) { state = 'busy'; label = 'Syncing…'; }
+    else if (n && navigator.onLine === false) { state = 'warn'; label = 'Offline · ' + n + ' waiting'; }
+    else if (n) { state = 'warn'; label = n + ' to sync'; }
+    else { state = 'ok'; label = 'All synced'; }
+    pill.className = 'pill' + (state === 'ok' ? '' : ' ' + state);
+    text.textContent = label;
+    pill.setAttribute('aria-label', cloudOn() ? 'Sync status: ' + label + '. Tap to sync.' : 'Storage: ' + label);
+  }
+  $('#storePill').addEventListener('click', function () {
+    if (!cloudOn()) { show('backup'); return; }
+    if (!canSync()) { showLogin(); return; }
+    syncNow(true);
+  });
+  document.addEventListener('click', function (e) { if (e.target.closest('[data-login]')) showLogin(); });
+
+  function loadProfile() {
+    return api.rest('GET', 'profiles?select=full_name,email,role,active&id=eq.' + encodeURIComponent(api.userId())).then(function (rows) {
+      me = (rows && rows[0]) || null;
+      lsSet(LS_PROFILE, JSON.stringify(me));
+      if (me && !me.active) {
+        var e = new Error('This login has been switched off by your admin.');
+        e.inactive = true;
+        throw e;
+      }
+      if (me && me.full_name && !lsGet(LS.by)) {
+        lsSet(LS.by, me.full_name);
+        if (!form.editingId && !$('#f-by').value) $('#f-by').value = me.full_name;
+      }
+    });
+  }
+
+  function pushLead(l, userId) {
+    var version = l.updatedAt;
+    var uploaded = Object.assign({}, l.uploaded || {});
+    var ids = (l.photoIds || []).slice();
+    return ids.reduce(function (p, pid) {
+      return p.then(function () {
+        if (uploaded[pid]) return;
+        return store.getPhoto(pid).then(function (ph) {
+          if (!ph || !ph.blob) return;
+          var path = userId + '/' + l.id + '/' + pid + '.' + IIJS.extFor(ph.blob.type);
+          return api.upload(path, ph.blob).then(function () { uploaded[pid] = path; });
+        });
+      });
+    }, Promise.resolve()).then(function () {
+      var paths = ids.map(function (pid) { return uploaded[pid]; }).filter(Boolean);
+      return api.rest('POST', 'leads?on_conflict=id', IIJS.toRow(l, paths), 'resolution=merge-duplicates,return=minimal');
+    }).then(function () {
+      var cur = findLead(l.id);
+      if (!cur) return;
+      cur.uploaded = Object.assign(cur.uploaded || {}, uploaded);
+      cur.ownerId = userId;
+      cur.remote = true;
+      // Only mark synced if it wasn't edited while uploading; otherwise the next run sends the edit.
+      if (cur.updatedAt === version) { cur.sync = 'synced'; cur.syncedAt = new Date().toISOString(); }
+      return store.putLead(cur);
+    });
+  }
+  function pushTombstones() {
+    return tombstones().reduce(function (p, t) {
+      return p.then(function () {
+        return api.rest('PATCH', 'leads?id=eq.' + encodeURIComponent(t.id), { deleted: true, updated_at: t.at }, 'return=minimal')
+          .then(function () { setTombstones(tombstones().filter(function (x) { return x.id !== t.id; })); });
+      });
+    }, Promise.resolve());
+  }
+  function syncNow(manual) {
+    if (!canSync()) return Promise.resolve();
+    if (sync.running) return sync.running;
+    if (navigator.onLine === false) {
+      if (manual) toast('No internet. Leads will sync when you are back online.', 'err');
+      renderSyncState();
+      return Promise.resolve();
+    }
+    var userId = api.userId(), before = unsyncedCount();
+    sync.error = '';
+    sync.running = loadProfile().then(function () {
+      var queue = leads.filter(function (l) { return l.sync !== 'synced' && mine(l); });
+      return queue.reduce(function (p, l) { return p.then(function () { return pushLead(l, userId); }); }, Promise.resolve());
+    }).then(pushTombstones).then(function () {
+      lsSet(LS_LASTSYNC, new Date().toISOString());
+      if (manual) toast(before ? 'Synced ' + plural(before, 'lead') + ' to the team list' : 'Everything is synced', 'ok');
+    }).catch(function (e) {
+      sync.error = friendly(e);
+      if (e.inactive && api.session) { api.session.expired = true; api._save(api.session); } // switched off: stop retrying until a fresh login
+      if (e.sessionExpired || e.inactive) { renderNewBanners(); toast(e.inactive ? e.message : 'Please log in again to keep syncing', 'err'); }
+      else if (manual) toast('Sync failed: ' + sync.error, 'err');
+    }).then(function () {
+      sync.running = null;
+      updateCounts();
+      if (document.body.getAttribute('data-view') === 'backup') renderBackup();
+    });
+    renderSyncState();
+    return sync.running;
+  }
+  function syncSoon() { clearTimeout(sync.timer); sync.timer = setTimeout(function () { syncNow(false); }, 1500); }
+  window.addEventListener('online', function () { renderSyncState(); syncSoon(); });
+  window.addEventListener('offline', renderSyncState);
+  document.addEventListener('visibilitychange', function () { if (document.visibilityState === 'visible') syncSoon(); });
+  setInterval(function () { if (unsyncedCount()) syncNow(false); }, 120000);
+
+  // login screen
+  var viewBeforeLogin = 'new';
+  function showLogin() {
+    if (!cloudOn()) return;
+    var cur = document.body.getAttribute('data-view');
+    if (cur !== 'login') viewBeforeLogin = cur || 'new';
+    $('#lg-email').value = api.email() || $('#lg-email').value;
+    $('#lgErr').hidden = true;
+    show('login');
+  }
+  $('#loginForm').addEventListener('submit', function (e) {
+    e.preventDefault();
+    var email = $('#lg-email').value.trim(), pass = $('#lg-pass').value, err = $('#lgErr'), btn = $('#lgBtn');
+    function fail(msg) { err.textContent = msg; err.hidden = false; }
+    err.hidden = true;
+    if (!email || !pass) { fail('Enter your email and password.'); return; }
+    if (navigator.onLine === false) { fail('You are offline. Connect to Wi-Fi or mobile data to log in. You can capture leads now and log in later.'); return; }
+    var prevUser = api.userId();
+    btn.disabled = true; btn.textContent = 'Logging in…';
+    api.login(email, pass).then(loadProfile).then(function () {
+      $('#lg-pass').value = '';
+      lsDel(LS_SKIP);
+      var others = prevUser && prevUser !== api.userId() ? leads.filter(function (l) { return l.ownerId && l.ownerId !== api.userId() && l.sync !== 'synced'; }).length : 0;
+      show(viewBeforeLogin === 'login' ? 'new' : viewBeforeLogin);
+      renderNewBanners();
+      toast('Logged in as ' + ((me && me.full_name) || email), 'ok');
+      if (others) alert(plural(others, 'lead') + ' on this phone were captured by a different login and will not be uploaded with this one. Export them from Backup.');
+      syncNow();
+    }).catch(function (e2) {
+      if (e2.inactive) api.logout();
+      fail(friendly(e2));
+    }).then(function () { btn.disabled = false; btn.textContent = 'Log in'; });
+  });
+  $('#lgSkip').addEventListener('click', function () {
+    lsSet(LS_SKIP, '1');
+    show(viewBeforeLogin === 'login' ? 'new' : viewBeforeLogin);
+    renderNewBanners();
+  });
+
+  function logout() {
+    var n = unsyncedCount();
+    var msg = n
+      ? plural(n, 'lead') + ' have NOT been synced yet and will be lost if you log out now.\n\nCancel, connect to the internet and tap Sync now first, or export a backup.\n\nLog out anyway?'
+      : 'Log out? Your leads are safely in the team list and will be removed from this phone.';
+    if (!confirm(msg)) return;
+    store.clear().then(function () {
+      Object.keys(urlCache).forEach(dropURL);
+      leads = [];
+      api.logout();
+      me = null;
+      [LS_PROFILE, LS_TOMB, LS_LASTSYNC, LS_SKIP, LS.by, LS.lastExport].forEach(lsDel);
+      resetForm();
+      updateCounts();
+      renderNewBanners();
+      $('#lg-email').value = '';
+      showLogin();
+    });
+  }
+  function renderAccount() {
+    var card = $('#accountCard');
+    card.hidden = !cloudOn();
+    if (!cloudOn()) return;
+    var html;
+    if (!api.session) {
+      html = '<p class="small">Not logged in. Leads stay on this phone until you log in, then they go to the team list.</p>' +
+        '<button type="button" class="btn btn-primary btn-block" data-login>Log in</button>';
+    } else {
+      var n = unsyncedCount(), last = lsGet(LS_LASTSYNC);
+      var others = leads.filter(function (l) { return !mine(l) && !l.imported; }).length;
+      html = '<dl class="kv" style="margin-top:0">' +
+        '<dt>Logged in as</dt><dd><b>' + esc((me && me.full_name) || '') + '</b><br><span class="muted">' + esc(api.email()) + '</span></dd>' +
+        '<dt>Role</dt><dd>' + (me && me.role === 'admin' ? 'Admin' : 'Team member') + '</dd>' +
+        '<dt>Last sync</dt><dd>' + (last ? esc(fmtDateTime(last)) : 'Not yet') + '</dd>' +
+        '<dt>Waiting</dt><dd>' + (n ? '<b style="color:#D9480F">' + plural(n, 'lead') + '</b>' : 'Nothing, all synced') + '</dd></dl>' +
+        (api.session.expired ? '<div class="banner warn">' + ICON.alert + '<div><b>Login expired</b>Log in again to sync. Your leads are safe on this phone.</div></div>' : '') +
+        (sync.error && !api.session.expired ? '<p class="hint err" style="margin:-4px 0 12px">Last sync problem: ' + esc(sync.error) + '</p>' : '') +
+        (others ? '<p class="hint warn" style="margin:-4px 0 12px">' + plural(others, 'lead') + ' belong to another login and will not be uploaded. Export them below.</p>' : '') +
+        '<div class="btn-row">' +
+        (api.session.expired ? '<button type="button" class="btn btn-primary" data-login>Log in again</button>'
+          : '<button type="button" class="btn btn-primary" data-act="sync"' + (sync.running ? ' disabled' : '') + '>' + (sync.running ? 'Syncing…' : 'Sync now') + '</button>') +
+        '<button type="button" class="btn btn-outline" data-act="logout">Log out</button></div>' +
+        (me && me.role === 'admin' ? '<a class="btn btn-secondary btn-block" style="margin-top:10px" href="admin.html">Open admin dashboard</a>' : '');
+    }
+    $('#accountBody').innerHTML = html;
+  }
+  $('#accountBody').addEventListener('click', function (e) {
+    var a = e.target.closest('[data-act]');
+    if (!a) return;
+    if (a.getAttribute('data-act') === 'sync') syncNow(true).then(renderBackup);
+    if (a.getAttribute('data-act') === 'logout') logout();
+  });
+
+  // ---------- one-time move of leads from the old single-file version ----------
+  function migrateV1() {
+    if (lsGet(LS.migrated)) return Promise.resolve(0);
+    var old = null;
+    try { old = JSON.parse(lsGet('iijs_leads_v1') || 'null'); } catch (e) { old = null; }
+    if (!Array.isArray(old) || !old.length) { if (store.persistent) lsSet(LS.migrated, '1'); return Promise.resolve(0); }
+    var n = 0;
+    return old.reduce(function (p, o) {
+      return p.then(function () {
+        var l = cleanLead(o);
+        var photo = Promise.resolve();
+        if (o.cardPhoto && /^data:image/.test(o.cardPhoto)) {
+          var pid = uid('ph');
+          photo = store.putPhoto({ id: pid, leadId: l.id, blob: dataURLtoBlob(o.cardPhoto), createdAt: l.timestamp }).then(function () { l.photoIds.push(pid); });
+        }
+        return photo.then(function () { return store.putLead(l); }).then(function () { n++; });
+      });
+    }, Promise.resolve()).then(function () {
+      if (store.persistent) lsSet(LS.migrated, '1');
+      return n;
+    });
+  }
+
+  // ---------- start ----------
+  window.addEventListener('beforeinstallprompt', function (e) {
+    e.preventDefault();
+    installPrompt = e;
+    if (document.body.getAttribute('data-view') === 'backup') renderBackup();
+  });
+  window.addEventListener('appinstalled', function () { installPrompt = null; renderNewBanners(); });
+
+  store.open().then(function () {
+    renderSyncState();
+    if (store.persistent && navigator.storage && navigator.storage.persist) navigator.storage.persist().catch(function () { /* best effort */ });
+    return migrateV1();
+  }).then(function (moved) {
+    return store.allLeads().then(function (all) {
+      leads = (all || []).map(function (l) { if (!l.photoIds) l.photoIds = []; return l; });
+      sortLeads();
+      if (moved) toast('Moved ' + plural(moved, 'lead') + ' from the old version', 'ok');
+    });
+  }).catch(function () {
+    toast('Could not read saved leads', 'err');
+  }).then(function () {
+    return restoreDraft();
+  }).then(function () {
+    updateCounts();
+    renderDatalists();
+    renderNewBanners();
+    if (cloudOn() && !api.session && !lsGet(LS_SKIP)) showLogin();
+    else syncNow();
+  });
+
+  if ('serviceWorker' in navigator && isHttp) {
+    navigator.serviceWorker.register('sw.js').then(function () { return navigator.serviceWorker.ready; })
+      .then(function () { offlineReady = true; if (document.body.getAttribute('data-view') === 'backup') renderBackup(); })
+      .catch(function () { /* offline cache unavailable */ });
+  }
+})();
+</script>
+</body>
+</html>
