@@ -1,6 +1,6 @@
 // Offline cache for IIJS Lead Capture.
 // Bump CACHE when any file changes so phones pick up the new version.
-var CACHE = 'iijs-leads-v3.0.0';
+var CACHE = 'iijs-leads-v3.0.2';
 var ASSETS = [
   './',
   './index.html',

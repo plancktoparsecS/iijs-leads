@@ -726,9 +726,18 @@ tr.is-deleted td { opacity: .55; }
         (r.users || []).forEach(function (u) { S.authUsers[u.id] = u; });
         $('#teamNotice').innerHTML = '';
         if (S.tab === 'team') renderTeam();
-      }).catch(function () {
+      }).catch(function (err) {
         S.authUsers = false;
-        $('#teamNotice').innerHTML = '<div class="notice"><b>Team management is not switched on yet.</b> Deploy the <i>admin-users</i> function (SETUP.md, step 5) to add people and reset passwords here. Until then, add users in Supabase → Authentication → Users.</div>';
+        var st = err && err.status, msg = (err && err.message) || String(err), hint;
+        if (!st) hint = 'The browser could not reach the function. In Supabase → Edge Functions, check a function named exactly <b>admin-users</b> exists, and that its <b>Verify JWT</b> setting is OFF (a rejected login is blocked before it can answer).';
+        else if (st === 404) hint = 'No function named <b>admin-users</b> was found. Check the name in Supabase → Edge Functions (exactly <b>admin-users</b>, lowercase, with a dash) and that it is deployed.';
+        else if (st === 401) hint = 'The function rejected your login. In Supabase → Edge Functions → admin-users → Details, switch <b>Verify JWT</b> OFF and save. Then log out here and log in again.';
+        else if (/server key missing/i.test(msg)) hint = 'Add the secret: Supabase → Edge Functions → Secrets → name <b>SERVICE_KEY</b>, value = your <b>secret</b> key (sb_secret_…).';
+        else if (/invalid api key|jwt|signature/i.test(msg)) hint = 'The <b>SERVICE_KEY</b> secret is wrong. Copy the <b>secret</b> key again from Project Settings → API Keys (not the publishable key).';
+        else hint = 'Send this exact message to whoever is helping you set up.';
+        $('#teamNotice').innerHTML = '<div class="notice"><b>Team management is not working yet.</b> Error' + (st ? ' ' + st : '') + ': <code>' + esc(msg) + '</code><br>' + hint +
+          '<br>Until then, add users in Supabase → Authentication → Users. <button type="button" class="btn btn-outline btn-sm" id="teamRetry" style="margin-top:8px">Try again</button></div>';
+        $('#teamRetry').addEventListener('click', function () { S.authUsers = null; $('#teamNotice').innerHTML = ''; renderTeam(); });
         if (S.tab === 'team') renderTeam();
       });
     }
